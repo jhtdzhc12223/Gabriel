@@ -3,116 +3,335 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexusCalc - Calculadora Científica Futurista</title>
+    <title>NexusCalc Quantum - Calculadora Científica Futurista</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <div class="cyber-container">
-        <div class="holographic-display" id="display">
-            <div class="display-main" id="main-display">0</div>
-            <div class="display-secondary" id="secondary-display"></div>
-            <div class="display-memory" id="memory-display"></div>
+    <div class="cyber-grid">
+        <!-- Painel Esquerdo - Calculadora -->
+        <div class="cyber-calculator">
+            <div class="cyber-housing">
+                <div class="holographic-display" id="display">
+                    <div class="display-main" id="main-display">0</div>
+                    <div class="display-secondary" id="secondary-display"></div>
+                    <div class="display-memory" id="memory-display"></div>
+                    <div class="display-mode" id="mode-display">MODO: CIENTÍFICO</div>
+                </div>
+                
+                <div class="cyber-controls">
+                    <div class="control-panel">
+                        <button class="cyber-btn mode-btn" data-mode="basic">
+                            <span class="btn-icon"><i class="fas fa-calculator"></i></span>
+                            <span class="btn-text">BÁSICO</span>
+                        </button>
+                        <button class="cyber-btn mode-btn active" data-mode="scientific">
+                            <span class="btn-icon"><i class="fas fa-atom"></i></span>
+                            <span class="btn-text">CIENTÍFICO</span>
+                        </button>
+                        <button class="cyber-btn mode-btn" data-mode="programmer">
+                            <span class="btn-icon"><i class="fas fa-code"></i></span>
+                            <span class="btn-text">PROGRAMADOR</span>
+                        </button>
+                        <button class="cyber-btn mode-btn" data-mode="graph">
+                            <span class="btn-icon"><i class="fas fa-project-diagram"></i></span>
+                            <span class="btn-text">GRÁFICOS</span>
+                        </button>
+                    </div>
+                    
+                    <div class="cyber-keyboard">
+                        <!-- Primeira Linha -->
+                        <button class="cyber-btn func-btn" data-func="second">
+                            <span class="func-primary">2nd</span>
+                            <span class="func-secondary">SHIFT</span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="sin">
+                            <span class="func-primary">sin</span>
+                            <span class="func-secondary">sin⁻¹</span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="cos">
+                            <span class="func-primary">cos</span>
+                            <span class="func-secondary">cos⁻¹</span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="tan">
+                            <span class="func-primary">tan</span>
+                            <span class="func-secondary">tan⁻¹</span>
+                        </button>
+                        <button class="cyber-btn op-btn" data-op="^">
+                            <span class="op-symbol">x<sup>y</sup></span>
+                        </button>
+                        <button class="cyber-btn op-btn" data-op="√">
+                            <span class="op-symbol">√x</span>
+                            <span class="op-secondary">x²</span>
+                        </button>
+                        <button class="cyber-btn op-btn" data-op="!">
+                            <span class="op-symbol">x!</span>
+                        </button>
+                        <button class="cyber-btn clear-btn" data-clear="C">
+                            <span class="clear-text">C</span>
+                            <span class="clear-subtext">RESET</span>
+                        </button>
+                        
+                        <!-- Segunda Linha -->
+                        <button class="cyber-btn func-btn" data-func="pi">
+                            <span class="func-primary">π</span>
+                            <span class="func-secondary">3.1415</span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="sinh">
+                            <span class="func-primary">sinh</span>
+                            <span class="func-secondary">sinh⁻¹</span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="cosh">
+                            <span class="func-primary">cosh</span>
+                            <span class="func-secondary">cosh⁻¹</span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="tanh">
+                            <span class="func-primary">tanh</span>
+                            <span class="func-secondary">tanh⁻¹</span>
+                        </button>
+                        <button class="cyber-btn op-btn" data-op="(">
+                            <span class="op-symbol">(</span>
+                        </button>
+                        <button class="cyber-btn op-btn" data-op=")">
+                            <span class="op-symbol">)</span>
+                        </button>
+                        <button class="cyber-btn op-btn" data-op="%">
+                            <span class="op-symbol">%</span>
+                            <span class="op-secondary">MOD</span>
+                        </button>
+                        <button class="cyber-btn clear-btn" data-clear="CE">
+                            <span class="clear-text">CE</span>
+                            <span class="clear-subtext">CLEAR</span>
+                        </button>
+                        
+                        <!-- Terceira Linha -->
+                        <button class="cyber-btn func-btn" data-func="e">
+                            <span class="func-primary">e</span>
+                            <span class="func-secondary">2.7182</span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="log">
+                            <span class="func-primary">log</span>
+                            <span class="func-secondary">10<sup>x</sup></span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="ln">
+                            <span class="func-primary">ln</span>
+                            <span class="func-secondary">e<sup>x</sup></span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="exp">
+                            <span class="func-primary">EXP</span>
+                            <span class="func-secondary">EE</span>
+                        </button>
+                        <button class="cyber-btn num-btn" data-num="7">
+                            <span class="num-char">7</span>
+                        </button>
+                        <button class="cyber-btn num-btn" data-num="8">
+                            <span class="num-char">8</span>
+                        </button>
+                        <button class="cyber-btn num-btn" data-num="9">
+                            <span class="num-char">9</span>
+                        </button>
+                        <button class="cyber-btn op-btn" data-op="/">
+                            <span class="op-symbol">÷</span>
+                        </button>
+                        
+                        <!-- Quarta Linha -->
+                        <button class="cyber-btn func-btn" data-func="rand">
+                            <span class="func-primary">RAND</span>
+                            <span class="func-secondary">RND</span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="abs">
+                            <span class="func-primary">|x|</span>
+                            <span class="func-secondary">ABS</span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="floor">
+                            <span class="func-primary">⌊x⌋</span>
+                            <span class="func-secondary">FLOOR</span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="ceil">
+                            <span class="func-primary">⌈x⌉</span>
+                            <span class="func-secondary">CEIL</span>
+                        </button>
+                        <button class="cyber-btn num-btn" data-num="4">
+                            <span class="num-char">4</span>
+                        </button>
+                        <button class="cyber-btn num-btn" data-num="5">
+                            <span class="num-char">5</span>
+                        </button>
+                        <button class="cyber-btn num-btn" data-num="6">
+                            <span class="num-char">6</span>
+                        </button>
+                        <button class="cyber-btn op-btn" data-op="*">
+                            <span class="op-symbol">×</span>
+                        </button>
+                        
+                        <!-- Quinta Linha -->
+                        <button class="cyber-btn func-btn" data-func="mod">
+                            <span class="func-primary">MOD</span>
+                            <span class="func-secondary">REM</span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="gcd">
+                            <span class="func-primary">GCD</span>
+                            <span class="func-secondary">MCD</span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="lcm">
+                            <span class="func-primary">LCM</span>
+                            <span class="func-secondary">MCM</span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="10^x">
+                            <span class="func-primary">10<sup>x</sup></span>
+                        </button>
+                        <button class="cyber-btn num-btn" data-num="1">
+                            <span class="num-char">1</span>
+                        </button>
+                        <button class="cyber-btn num-btn" data-num="2">
+                            <span class="num-char">2</span>
+                        </button>
+                        <button class="cyber-btn num-btn" data-num="3">
+                            <span class="num-char">3</span>
+                        </button>
+                        <button class="cyber-btn op-btn" data-op="-">
+                            <span class="op-symbol">−</span>
+                        </button>
+                        
+                        <!-- Sexta Linha -->
+                        <button class="cyber-btn func-btn" data-func="bin">
+                            <span class="func-primary">BIN</span>
+                            <span class="func-secondary">→BIN</span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="hex">
+                            <span class="func-primary">HEX</span>
+                            <span class="func-secondary">→HEX</span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="oct">
+                            <span class="func-primary">OCT</span>
+                            <span class="func-secondary">→OCT</span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="deg">
+                            <span class="func-primary">DEG</span>
+                            <span class="func-secondary">RAD</span>
+                        </button>
+                        <button class="cyber-btn num-btn" data-num="0">
+                            <span class="num-char">0</span>
+                        </button>
+                        <button class="cyber-btn num-btn" data-num=".">
+                            <span class="num-char">.</span>
+                            <span class="num-subchar">·</span>
+                        </button>
+                        <button class="cyber-btn op-btn" data-op="±">
+                            <span class="op-symbol">±</span>
+                            <span class="op-secondary">NEG</span>
+                        </button>
+                        <button class="cyber-btn op-btn" data-op="+">
+                            <span class="op-symbol">+</span>
+                        </button>
+                        
+                        <!-- Sétima Linha -->
+                        <button class="cyber-btn func-btn" data-func="mem-clear">
+                            <span class="func-primary">MC</span>
+                            <span class="func-secondary">MEM CLR</span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="mem-recall">
+                            <span class="func-primary">MR</span>
+                            <span class="func-secondary">MEM RCL</span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="mem-add">
+                            <span class="func-primary">M+</span>
+                            <span class="func-secondary">MEM +</span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="mem-sub">
+                            <span class="func-primary">M-</span>
+                            <span class="func-secondary">MEM -</span>
+                        </button>
+                        <button class="cyber-btn equals-btn" data-op="=">
+                            <span class="equals-symbol">=</span>
+                            <span class="equals-subtext">ENTER</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="cyber-branding">
+                    <div class="brand-name">NEXUSCALC QUANTUM</div>
+                    <div class="brand-version">v3.14159265</div>
+                </div>
+                
+                <div class="cyber-effects">
+                    <div class="neon-line"></div>
+                    <div class="grid-overlay"></div>
+                    <div class="particle-container" id="particles"></div>
+                </div>
+            </div>
         </div>
         
-        <div class="cyber-controls">
-            <div class="control-panel">
-                <button class="cyber-btn mode-btn" data-mode="basic">Básico</button>
-                <button class="cyber-btn mode-btn active" data-mode="scientific">Científico</button>
-                <button class="cyber-btn mode-btn" data-mode="programmer">Programador</button>
-                <button class="cyber-btn mode-btn" data-mode="graph">Gráficos</button>
+        <!-- Painel Direito - Terminal e Histórico -->
+        <div class="cyber-terminal-panel">
+            <div class="terminal-container">
+                <div class="terminal-header">
+                    <div class="terminal-title">
+                        <i class="fas fa-terminal"></i>
+                        <span>NEXUS TERMINAL</span>
+                    </div>
+                    <div class="terminal-controls">
+                        <button class="terminal-btn minimize"><i class="fas fa-minus"></i></button>
+                        <button class="terminal-btn maximize"><i class="fas fa-square"></i></button>
+                        <button class="terminal-btn close"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+                
+                <div class="terminal-body" id="terminal-output">
+                    <div class="terminal-line system">> Sistema NexusCalc Quantum inicializando...</div>
+                    <div class="terminal-line system">> Verificando módulos matemáticos...</div>
+                    <div class="terminal-line success">> Módulo científico carregado</div>
+                    <div class="terminal-line success">> Módulo de programação carregado</div>
+                    <div class="terminal-line success">> Módulo gráfico carregado</div>
+                    <div class="terminal-line system">> Carregando funções avançadas...</div>
+                    <div class="terminal-line success">> 127 funções carregadas com sucesso</div>
+                    <div class="terminal-line system">> Inicializando interface holográfica...</div>
+                    <div class="terminal-line success">> Pronto para operação</div>
+                    <div class="terminal-line prompt">> _</div>
+                </div>
+                
+                <div class="terminal-input">
+                    <span class="input-prompt">></span>
+                    <input type="text" class="command-input" placeholder="Digite um comando...">
+                    <button class="send-btn"><i class="fas fa-paper-plane"></i></button>
+                </div>
             </div>
             
-            <div class="cyber-keyboard">
-                <!-- Row 1 -->
-                <button class="cyber-btn func-btn" data-func="second">2nd</button>
-                <button class="cyber-btn func-btn" data-func="sin">sin</button>
-                <button class="cyber-btn func-btn" data-func="cos">cos</button>
-                <button class="cyber-btn func-btn" data-func="tan">tan</button>
-                <button class="cyber-btn op-btn" data-op="^">x^y</button>
-                <button class="cyber-btn op-btn" data-op="√">√x</button>
-                <button class="cyber-btn op-btn" data-op="!">x!</button>
-                <button class="cyber-btn clear-btn" data-clear="C">C</button>
+            <div class="history-container">
+                <div class="history-header">
+                    <div class="history-title">
+                        <i class="fas fa-history"></i>
+                        <span>HISTÓRICO DE CÁLCULOS</span>
+                    </div>
+                    <div class="history-controls">
+                        <button class="history-btn clear"><i class="fas fa-trash"></i></button>
+                        <button class="history-btn export"><i class="fas fa-file-export"></i></button>
+                    </div>
+                </div>
                 
-                <!-- Row 2 -->
-                <button class="cyber-btn func-btn" data-func="pi">π</button>
-                <button class="cyber-btn func-btn" data-func="sinh">sinh</button>
-                <button class="cyber-btn func-btn" data-func="cosh">cosh</button>
-                <button class="cyber-btn func-btn" data-func="tanh">tanh</button>
-                <button class="cyber-btn op-btn" data-op="(">(</button>
-                <button class="cyber-btn op-btn" data-op=")">)</button>
-                <button class="cyber-btn op-btn" data-op="%">%</button>
-                <button class="cyber-btn clear-btn" data-clear="CE">CE</button>
-                
-                <!-- Row 3 -->
-                <button class="cyber-btn func-btn" data-func="e">e</button>
-                <button class="cyber-btn func-btn" data-func="log">log</button>
-                <button class="cyber-btn func-btn" data-func="ln">ln</button>
-                <button class="cyber-btn func-btn" data-func="exp">EXP</button>
-                <button class="cyber-btn num-btn" data-num="7">7</button>
-                <button class="cyber-btn num-btn" data-num="8">8</button>
-                <button class="cyber-btn num-btn" data-num="9">9</button>
-                <button class="cyber-btn op-btn" data-op="/">÷</button>
-                
-                <!-- Row 4 -->
-                <button class="cyber-btn func-btn" data-func="rand">RAND</button>
-                <button class="cyber-btn func-btn" data-func="abs">|x|</button>
-                <button class="cyber-btn func-btn" data-func="floor">⌊x⌋</button>
-                <button class="cyber-btn func-btn" data-func="ceil">⌈x⌉</button>
-                <button class="cyber-btn num-btn" data-num="4">4</button>
-                <button class="cyber-btn num-btn" data-num="5">5</button>
-                <button class="cyber-btn num-btn" data-num="6">6</button>
-                <button class="cyber-btn op-btn" data-op="*">×</button>
-                
-                <!-- Row 5 -->
-                <button class="cyber-btn func-btn" data-func="mod">MOD</button>
-                <button class="cyber-btn func-btn" data-func="gcd">GCD</button>
-                <button class="cyber-btn func-btn" data-func="lcm">LCM</button>
-                <button class="cyber-btn func-btn" data-func="10^x">10^x</button>
-                <button class="cyber-btn num-btn" data-num="1">1</button>
-                <button class="cyber-btn num-btn" data-num="2">2</button>
-                <button class="cyber-btn num-btn" data-num="3">3</button>
-                <button class="cyber-btn op-btn" data-op="-">-</button>
-                
-                <!-- Row 6 -->
-                <button class="cyber-btn func-btn" data-func="bin">BIN</button>
-                <button class="cyber-btn func-btn" data-func="hex">HEX</button>
-                <button class="cyber-btn func-btn" data-func="oct">OCT</button>
-                <button class="cyber-btn func-btn" data-func="deg">DEG</button>
-                <button class="cyber-btn num-btn" data-num="0">0</button>
-                <button class="cyber-btn num-btn" data-num=".">.</button>
-                <button class="cyber-btn op-btn" data-op="±">±</button>
-                <button class="cyber-btn op-btn" data-op="+">+</button>
-                
-                <!-- Row 7 -->
-                <button class="cyber-btn func-btn" data-func="mem-clear">MC</button>
-                <button class="cyber-btn func-btn" data-func="mem-recall">MR</button>
-                <button class="cyber-btn func-btn" data-func="mem-add">M+</button>
-                <button class="cyber-btn func-btn" data-func="mem-sub">M-</button>
-                <button class="cyber-btn equals-btn" data-op="=">=</button>
+                <div class="history-body" id="calculation-history">
+                    <div class="history-item">
+                        <span class="history-expression">2 + 2 × 5</span>
+                        <span class="history-result">= 12</span>
+                        <span class="history-time">10:23:45</span>
+                    </div>
+                    <div class="history-item">
+                        <span class="history-expression">sin(π/2)</span>
+                        <span class="history-result">= 1</span>
+                        <span class="history-time">10:22:18</span>
+                    </div>
+                    <div class="history-item">
+                        <span class="history-expression">√(16)</span>
+                        <span class="history-result">= 4</span>
+                        <span class="history-time">10:21:56</span>
+                    </div>
+                    <div class="history-item">
+                        <span class="history-expression">5!</span>
+                        <span class="history-result">= 120</span>
+                        <span class="history-time">10:21:30</span>
+                    </div>
+                </div>
             </div>
-        </div>
-        
-        <div class="cyber-effects">
-            <div class="neon-line"></div>
-            <div class="grid-overlay"></div>
-            <div class="particle-container" id="particles"></div>
-        </div>
-    </div>
-    
-    <div class="cyber-terminal">
-        <div class="terminal-header">
-            <span class="terminal-title">NexusCalc v3.14 - Console</span>
-            <span class="terminal-controls">
-                <i class="fas fa-minus"></i>
-                <i class="fas fa-square"></i>
-                <i class="fas fa-times"></i>
-            </span>
-        </div>
-        <div class="terminal-body" id="terminal-output">
-            <div>> Sistema NexusCalc inicializado</div>
-            <div>> Modo científico ativado</div>
-            <div>> Pronto para cálculos</div>
         </div>
     </div>
     
