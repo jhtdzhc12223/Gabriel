@@ -10,7 +10,8 @@ document.addEventListener('DOMContentLoaded', function() {
         isRadians: true,
         history: [],
         lastOperation: null,
-        currentMode: 'scientific'
+        currentMode: 'scientific',
+        waitingForOperand: false
     };
 
     // Elementos DOM
@@ -22,21 +23,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const calculationHistory = document.getElementById('calculation-history');
     const commandInput = document.querySelector('.command-input');
     
-    // Inicializar partículas
+    // Inicialização
     initParticles();
-    
-    // Adicionar listeners de eventos
     setupEventListeners();
-    
-    // Atualizar display
     updateDisplay();
-    
-    // Mensagens iniciais do terminal
-    addTerminalMessage("> Inicializando módulos matemáticos...", "system");
-    setTimeout(() => addTerminalMessage("> Carregando funções trigonométricas...", "system"), 500);
-    setTimeout(() => addTerminalMessage("> Funções científicas carregadas com sucesso", "success"), 1000);
-    setTimeout(() => addTerminalMessage("> Sistema pronto para operação", "success"), 1500);
-    setTimeout(() => addTerminalMessage("> _", "prompt"), 2000);
+    showWelcomeMessages();
     
     // Configurar listeners de eventos
     function setupEventListeners() {
@@ -65,23 +56,34 @@ document.addEventListener('DOMContentLoaded', function() {
             button.addEventListener('click', () => switchMode(button.dataset.mode));
         });
         
-        // Botão de enviar comando
+        // Terminal
         document.querySelector('.send-btn').addEventListener('click', handleCommand);
-        
-        // Input de comando (tecla Enter)
         commandInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleCommand();
         });
         
-        // Botão de limpar histórico
+        // Histórico
         document.querySelector('.history-btn.clear').addEventListener('click', clearHistory);
         
-        // Suporte a teclado
+        // Teclado
         document.addEventListener('keydown', handleKeyboardInput);
+    }
+
+    function showWelcomeMessages() {
+        addTerminalMessage("> Inicializando módulos matemáticos...", "system");
+        setTimeout(() => addTerminalMessage("> Carregando funções trigonométricas...", "system"), 500);
+        setTimeout(() => addTerminalMessage("> Funções científicas carregadas com sucesso", "success"), 1000);
+        setTimeout(() => addTerminalMessage("> Sistema pronto para operação", "success"), 1500);
+        setTimeout(() => addTerminalMessage("> _", "prompt"), 2000);
     }
     
     // Manipulador de entrada numérica
     function handleNumberInput(num) {
+        if (state.waitingForOperand) {
+            state.currentValue = '0';
+            state.waitingForOperand = false;
+        }
+
         if (state.currentValue === '0' && num !== '.') {
             state.currentValue = num;
         } else if (num === '.' && state.currentValue.includes('.')) {
@@ -120,6 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 state.currentValue = '0';
             }
             state.operation = op;
+            state.waitingForOperand = true;
         }
         
         updateDisplay();
@@ -130,171 +133,224 @@ document.addEventListener('DOMContentLoaded', function() {
         let result;
         const value = parseFloat(state.currentValue);
         
-        switch(func) {
-            case 'second':
-                state.isSecondFunction = !state.isSecondFunction;
+        try {
+            switch(func) {
+                case 'second':
+                    state.isSecondFunction = !state.isSecondFunction;
+                    updateFunctionButtons();
+                    addTerminalMessage(`> Funções secundárias ${state.isSecondFunction ? 'ativadas' : 'desativadas'}`, "system");
+                    return;
+                    
+                case 'sin':
+                    if (state.isSecondFunction) {
+                        if (value < -1 || value > 1) throw new Error("Valor inválido para arcseno");
+                        result = Math.asin(value);
+                        if (!state.isRadians) result = toDegrees(result);
+                    } else {
+                        result = Math.sin(state.isRadians ? value : toRadians(value));
+                    }
+                    break;
+                    
+                case 'cos':
+                    if (state.isSecondFunction) {
+                        if (value < -1 || value > 1) throw new Error("Valor inválido para arccosseno");
+                        result = Math.acos(value);
+                        if (!state.isRadians) result = toDegrees(result);
+                    } else {
+                        result = Math.cos(state.isRadians ? value : toRadians(value));
+                    }
+                    break;
+                    
+                case 'tan':
+                    if (state.isSecondFunction) {
+                        result = Math.atan(value);
+                        if (!state.isRadians) result = toDegrees(result);
+                    } else {
+                        const input = state.isRadians ? value : toRadians(value);
+                        if (Math.abs(input % (Math.PI/2)) < 1e-10) throw new Error("Tangente indefinida");
+                        result = Math.tan(input);
+                    }
+                    break;
+                    
+                case 'sinh':
+                    result = state.isSecondFunction ? Math.asinh(value) : Math.sinh(value);
+                    break;
+                    
+                case 'cosh':
+                    if (state.isSecondFunction && value < 1) throw new Error("Valor inválido para arccosh");
+                    result = state.isSecondFunction ? Math.acosh(value) : Math.cosh(value);
+                    break;
+                    
+                case 'tanh':
+                    result = state.isSecondFunction ? Math.atanh(value) : Math.tanh(value);
+                    break;
+                    
+                case 'log':
+                    if (value <= 0) throw new Error("Logaritmo de número não positivo");
+                    result = state.isSecondFunction ? Math.pow(10, value) : Math.log10(value);
+                    break;
+                    
+                case 'ln':
+                    if (value <= 0) throw new Error("Logaritmo natural de número não positivo");
+                    result = state.isSecondFunction ? Math.exp(value) : Math.log(value);
+                    break;
+                    
+                case 'exp':
+                    result = Math.exp(value);
+                    break;
+                    
+                case 'pi':
+                    result = Math.PI;
+                    break;
+                    
+                case 'e':
+                    result = Math.E;
+                    break;
+                    
+                case '^':
+                    if (state.previousValue === null) throw new Error("Digite um número antes da operação");
+                    result = Math.pow(parseFloat(state.previousValue), value);
+                    break;
+                    
+                case '√':
+                    if (value < 0) throw new Error("Raiz quadrada de número negativo");
+                    result = state.isSecondFunction ? Math.pow(value, 2) : Math.sqrt(value);
+                    break;
+                    
+                case '!':
+                    if (value < 0 || !Number.isInteger(value)) throw new Error("Fatorial de número não inteiro ou negativo");
+                    result = factorial(value);
+                    break;
+                    
+                case 'abs':
+                    result = Math.abs(value);
+                    break;
+                    
+                case 'floor':
+                    result = Math.floor(value);
+                    break;
+                    
+                case 'ceil':
+                    result = Math.ceil(value);
+                    break;
+                    
+                case 'rand':
+                    result = Math.random();
+                    break;
+                    
+                case 'mod':
+                    if (state.previousValue === null) throw new Error("Digite um número antes da operação");
+                    if (value === 0) throw new Error("Divisão por zero");
+                    result = parseFloat(state.previousValue) % value;
+                    break;
+                    
+                case 'gcd':
+                    if (!Number.isInteger(value) || !Number.isInteger(parseFloat(state.previousValue || '0'))) {
+                        throw new Error("GCD requer números inteiros");
+                    }
+                    result = gcd(parseFloat(state.previousValue || '0'), value);
+                    break;
+                    
+                case 'lcm':
+                    if (!Number.isInteger(value) || !Number.isInteger(parseFloat(state.previousValue || '0'))) {
+                        throw new Error("LCM requer números inteiros");
+                    }
+                    result = lcm(parseFloat(state.previousValue || '0'), value);
+                    break;
+                    
+                case '10^x':
+                    result = Math.pow(10, value);
+                    break;
+                    
+                case 'deg':
+                    state.isRadians = !state.isRadians;
+                    addTerminalMessage(`> Modo ângulo alterado para: ${state.isRadians ? 'Radianos' : 'Graus'}`, "system");
+                    modeDisplay.textContent = `MODO: ${state.currentMode.toUpperCase()} | ${state.isRadians ? 'RAD' : 'DEG'}`;
+                    return;
+                    
+                case 'mem-clear':
+                    state.memory = 0;
+                    addTerminalMessage("> Memória limpa", "system");
+                    break;
+                    
+                case 'mem-recall':
+                    result = state.memory;
+                    break;
+                    
+                case 'mem-add':
+                    state.memory += parseFloat(state.currentValue);
+                    addTerminalMessage(`> Valor adicionado à memória: ${state.currentValue}`, "system");
+                    break;
+                    
+                case 'mem-sub':
+                    state.memory -= parseFloat(state.currentValue);
+                    addTerminalMessage(`> Valor subtraído da memória: ${state.currentValue}`, "system");
+                    break;
+                    
+                case 'bin':
+                    if (!Number.isInteger(value)) throw new Error("Conversão para binário requer número inteiro");
+                    result = parseInt(state.currentValue).toString(2);
+                    addTerminalMessage(`> Conversão para binário: ${result}`, "system");
+                    break;
+                    
+                case 'hex':
+                    if (!Number.isInteger(value)) throw new Error("Conversão para hexadecimal requer número inteiro");
+                    result = parseInt(state.currentValue).toString(16).toUpperCase();
+                    addTerminalMessage(`> Conversão para hexadecimal: 0x${result}`, "system");
+                    break;
+                    
+                case 'oct':
+                    if (!Number.isInteger(value)) throw new Error("Conversão para octal requer número inteiro");
+                    result = parseInt(state.currentValue).toString(8);
+                    addTerminalMessage(`> Conversão para octal: 0o${result}`, "system");
+                    break;
+                    
+                default:
+                    return;
+            }
+            
+            if (result !== undefined) {
+                state.lastOperation = {
+                    function: func,
+                    input: state.currentValue,
+                    output: formatResult(result),
+                    isSecond: state.isSecondFunction,
+                    timestamp: new Date()
+                };
+                
+                state.history.push(state.lastOperation);
+                addToHistory(state.lastOperation);
+                
+                state.currentValue = formatResult(result);
+                state.isSecondFunction = false;
+                state.waitingForOperand = true;
                 updateFunctionButtons();
-                addTerminalMessage(`> Funções secundárias ${state.isSecondFunction ? 'ativadas' : 'desativadas'}`, "system");
-                return;
-                
-            case 'sin':
-                result = Math.sin(state.isRadians ? value : toRadians(value));
-                if (state.isSecondFunction) result = Math.asin(value);
-                break;
-                
-            case 'cos':
-                result = Math.cos(state.isRadians ? value : toRadians(value));
-                if (state.isSecondFunction) result = Math.acos(value);
-                break;
-                
-            case 'tan':
-                result = Math.tan(state.isRadians ? value : toRadians(value));
-                if (state.isSecondFunction) result = Math.atan(value);
-                break;
-                
-            case 'sinh':
-                result = Math.sinh(value);
-                if (state.isSecondFunction) result = Math.asinh(value);
-                break;
-                
-            case 'cosh':
-                result = Math.cosh(value);
-                if (state.isSecondFunction) result = Math.acosh(value);
-                break;
-                
-            case 'tanh':
-                result = Math.tanh(value);
-                if (state.isSecondFunction) result = Math.atanh(value);
-                break;
-                
-            case 'log':
-                result = Math.log10(value);
-                if (state.isSecondFunction) result = Math.pow(10, value);
-                break;
-                
-            case 'ln':
-                result = Math.log(value);
-                if (state.isSecondFunction) result = Math.exp(value);
-                break;
-                
-            case 'exp':
-                result = Math.exp(value);
-                break;
-                
-            case 'pi':
-                result = Math.PI;
-                break;
-                
-            case 'e':
-                result = Math.E;
-                break;
-                
-            case '^':
-                result = Math.pow(parseFloat(state.previousValue || '0'), value);
-                break;
-                
-            case '√':
-                result = Math.sqrt(value);
-                if (state.isSecondFunction) result = Math.pow(value, 2);
-                break;
-                
-            case '!':
-                result = factorial(value);
-                break;
-                
-            case 'abs':
-                result = Math.abs(value);
-                break;
-                
-            case 'floor':
-                result = Math.floor(value);
-                break;
-                
-            case 'ceil':
-                result = Math.ceil(value);
-                break;
-                
-            case 'rand':
-                result = Math.random();
-                break;
-                
-            case 'mod':
-                result = parseFloat(state.previousValue || '0') % value;
-                break;
-                
-            case 'gcd':
-                result = gcd(parseFloat(state.previousValue || '0'), value);
-                break;
-                
-            case 'lcm':
-                result = lcm(parseFloat(state.previousValue || '0'), value);
-                break;
-                
-            case '10^x':
-                result = Math.pow(10, value);
-                break;
-                
-            case 'deg':
-                state.isRadians = !state.isRadians;
-                addTerminalMessage(`> Modo ângulo alterado para: ${state.isRadians ? 'Radianos' : 'Graus'}`, "system");
-                modeDisplay.textContent = `MODO: ${state.currentMode.toUpperCase()} | ${state.isRadians ? 'RAD' : 'DEG'}`;
-                return;
-                
-            case 'mem-clear':
-                state.memory = 0;
-                addTerminalMessage("> Memória limpa", "system");
-                break;
-                
-            case 'mem-recall':
-                result = state.memory;
-                break;
-                
-            case 'mem-add':
-                state.memory += parseFloat(state.currentValue);
-                addTerminalMessage(`> Valor adicionado à memória: ${state.currentValue}`, "system");
-                break;
-                
-            case 'mem-sub':
-                state.memory -= parseFloat(state.currentValue);
-                addTerminalMessage(`> Valor subtraído da memória: ${state.currentValue}`, "system");
-                break;
-                
-            case 'bin':
-                result = parseInt(state.currentValue).toString(2);
-                addTerminalMessage(`> Conversão para binário: ${result}`, "system");
-                break;
-                
-            case 'hex':
-                result = parseInt(state.currentValue).toString(16).toUpperCase();
-                addTerminalMessage(`> Conversão para hexadecimal: 0x${result}`, "system");
-                break;
-                
-            case 'oct':
-                result = parseInt(state.currentValue).toString(8);
-                addTerminalMessage(`> Conversão para octal: 0o${result}`, "system");
-                break;
-                
-            default:
-                return;
-        }
-        
-        if (result !== undefined) {
-            state.lastOperation = {
-                function: func,
-                input: state.currentValue,
-                output: result.toString(),
-                isSecond: state.isSecondFunction,
-                timestamp: new Date()
-            };
-            
-            state.history.push(state.lastOperation);
-            addToHistory(state.lastOperation);
-            
-            state.currentValue = result.toString();
-            state.isSecondFunction = false;
-            updateFunctionButtons();
+                updateDisplay();
+            }
+        } catch (error) {
+            addTerminalMessage(`> Erro: ${error.message}`, "error");
+            state.currentValue = '0';
             updateDisplay();
         }
+    }
+    
+    // Formatar resultado para exibição
+    function formatResult(value) {
+        // Tratar números muito grandes ou muito pequenos
+        if (Math.abs(value) > 1e12 || (Math.abs(value) < 1e-6 && value !== 0)) {
+            return value.toExponential(8).replace(/(\.\d*?[1-9])0+e/, '$1e').replace(/\.?0+e/, 'e');
+        }
+        
+        // Tratar números inteiros
+        if (Number.isInteger(value)) {
+            return value.toString();
+        }
+        
+        // Arredondar para 10 dígitos significativos
+        const rounded = parseFloat(value.toPrecision(10));
+        
+        // Remover zeros desnecessários
+        return rounded.toString().replace(/(\.\d*?[1-9])0+$/, '$1').replace(/\.0+$/, '');
     }
     
     // Manipulador de limpeza
@@ -303,71 +359,78 @@ document.addEventListener('DOMContentLoaded', function() {
             state.currentValue = '0';
             state.previousValue = null;
             state.operation = null;
+            state.waitingForOperand = false;
             addTerminalMessage("> Calculadora reiniciada", "system");
         } else if (clearType === 'CE') {
             state.currentValue = '0';
+            state.waitingForOperand = false;
         }
         updateDisplay();
     }
     
     // Realizar cálculo
     function calculate() {
-        let result;
-        const prev = parseFloat(state.previousValue);
-        const current = parseFloat(state.currentValue);
-        
-        if (isNaN(prev) {
-            addTerminalMessage("> Erro: Valor anterior inválido", "error");
-            return;
-        }
-        
-        if (isNaN(current)) {
-            addTerminalMessage("> Erro: Valor atual inválido", "error");
-            return;
-        }
-        
-        switch(state.operation) {
-            case '+':
-                result = prev + current;
-                break;
-            case '-':
-                result = prev - current;
-                break;
-            case '*':
-                result = prev * current;
-                break;
-            case '/':
-                if (current === 0) {
-                    addTerminalMessage("> Erro: Divisão por zero", "error");
+        try {
+            let result;
+            const prev = parseFloat(state.previousValue);
+            const current = parseFloat(state.currentValue);
+            
+            if (isNaN(prev)) {
+                throw new Error("Valor anterior inválido");
+            }
+            
+            if (isNaN(current)) {
+                throw new Error("Valor atual inválido");
+            }
+            
+            switch(state.operation) {
+                case '+':
+                    result = prev + current;
+                    break;
+                case '-':
+                    result = prev - current;
+                    break;
+                case '*':
+                    result = prev * current;
+                    break;
+                case '/':
+                    if (current === 0) throw new Error("Divisão por zero");
+                    result = prev / current;
+                    break;
+                case '%':
+                    if (current === 0) throw new Error("Divisão por zero");
+                    result = prev % current;
+                    break;
+                case '^':
+                    result = Math.pow(prev, current);
+                    break;
+                default:
                     return;
-                }
-                result = prev / current;
-                break;
-            case '%':
-                result = prev % current;
-                break;
-            case '^':
-                result = Math.pow(prev, current);
-                break;
-            default:
-                return;
+            }
+            
+            state.lastOperation = {
+                operation: state.operation,
+                operand1: prev,
+                operand2: current,
+                result: result,
+                timestamp: new Date()
+            };
+            
+            state.history.push(state.lastOperation);
+            addToHistory(state.lastOperation);
+            
+            state.currentValue = formatResult(result);
+            state.previousValue = null;
+            state.waitingForOperand = true;
+            
+            addTerminalMessage(`> Cálculo: ${prev} ${state.operation} ${current} = ${result}`, "success");
+        } catch (error) {
+            addTerminalMessage(`> Erro: ${error.message}`, "error");
+            state.currentValue = '0';
+            state.previousValue = null;
+            state.operation = null;
+            updateDisplay();
         }
-        
-        state.lastOperation = {
-            operation: state.operation,
-            operand1: prev,
-            operand2: current,
-            result: result,
-            timestamp: new Date()
-        };
-        
-        state.history.push(state.lastOperation);
-        addToHistory(state.lastOperation);
-        
-        state.currentValue = result.toString();
-        state.previousValue = null;
-        
-        addTerminalMessage(`> Cálculo: ${prev} ${state.operation} ${current} = ${result}`, "success");
     }
     
     // Atualizar display
@@ -380,7 +443,7 @@ document.addEventListener('DOMContentLoaded', function() {
             secondaryDisplay.textContent = '';
         }
         
-        memoryDisplay.textContent = state.memory !== 0 ? `MEM: ${state.memory}` : '';
+        memoryDisplay.textContent = state.memory !== 0 ? `MEM: ${formatResult(state.memory)}` : '';
     }
     
     // Atualizar botões de função
@@ -486,8 +549,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         document.querySelectorAll('.mode-btn').forEach(btn => {
             btn.classList.remove('active');
+            if (btn.dataset.mode === mode) {
+                btn.classList.add('active');
+            }
         });
-        event.target.classList.add('active');
         
         modeDisplay.textContent = `MODO: ${mode.toUpperCase()} | ${state.isRadians ? 'RAD' : 'DEG'}`;
         addTerminalMessage(`> Modo alterado para: ${mode.toUpperCase()}`, "system");
@@ -545,7 +610,6 @@ document.addEventListener('DOMContentLoaded', function() {
         addTerminalMessage(`> ${command}`, "prompt");
         commandInput.value = '';
         
-        // Processar comando
         processCommand(command);
     }
     
@@ -613,7 +677,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         addTerminalMessage("> Histórico de cálculos:", "system");
         state.history.slice().reverse().forEach((op, index) => {
-            if (index >= 10) return; // Limitar a 10 itens
+            if (index >= 10) return;
             
             if (op.operation) {
                 addTerminalMessage(`> ${op.operand1} ${op.operation} ${op.operand2} = ${op.result}`, "system");
@@ -674,6 +738,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Funções auxiliares matemáticas
     function toRadians(degrees) {
         return degrees * (Math.PI / 180);
+    }
+    
+    function toDegrees(radians) {
+        return radians * (180 / Math.PI);
     }
     
     function factorial(n) {
