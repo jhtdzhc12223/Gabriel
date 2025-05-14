@@ -18,6 +18,42 @@
     --transition-speed: 0.3s;
 }
 
+/* Temas adicionais */
+:root.purple-blue {
+    --accent-primary: #8a2be2;
+    --accent-secondary: #00bfff;
+    --neon-primary: #d300ff;
+    --neon-secondary: #00f7ff;
+}
+
+:root.cyber-green {
+    --accent-primary: #00ff9d;
+    --accent-secondary: #00e5ff;
+    --neon-primary: #00ff9d;
+    --neon-secondary: #00ff41;
+    --primary-dark: #0a120f;
+    --secondary-dark: #121d19;
+}
+
+:root.matrix {
+    --accent-primary: #00ff41;
+    --accent-secondary: #008f11;
+    --neon-primary: #00ff41;
+    --neon-secondary: #008f11;
+    --primary-dark: #000000;
+    --secondary-dark: #0a0a0a;
+    --text-primary: #00ff41;
+}
+
+:root.dark-red {
+    --accent-primary: #ff003c;
+    --accent-secondary: #ff6b6b;
+    --neon-primary: #ff003c;
+    --neon-secondary: #ff6b6b;
+    --primary-dark: #120a0a;
+    --secondary-dark: #1d1212;
+}
+
 /* Reset e estilos base */
 * {
     margin: 0;
@@ -325,6 +361,14 @@ body {
 .func-btn .func-secondary {
     font-size: 0.6rem;
     color: var(--text-tertiary);
+}
+
+.stats-btn {
+    background-color: rgba(40, 100, 40, 0.9);
+}
+
+.constants-btn {
+    background-color: rgba(100, 40, 100, 0.9);
 }
 
 .clear-btn {
@@ -690,6 +734,44 @@ body {
 
 .brand-version {
     color: var(--text-tertiary);
+}
+
+/* Efeitos de tema */
+.theme-switcher {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    display: flex;
+    gap: 10px;
+}
+
+.theme-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--text-primary);
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.theme-btn:hover {
+    transform: scale(1.2);
+}
+
+.theme-btn.purple-blue {
+    background: linear-gradient(135deg, #8a2be2, #00bfff);
+}
+
+.theme-btn.cyber-green {
+    background: linear-gradient(135deg, #00ff9d, #00e5ff);
+}
+
+.theme-btn.matrix {
+    background: linear-gradient(135deg, #00ff41, #008f11);
+}
+
+.theme-btn.dark-red {
+    background: linear-gradient(135deg, #ff003c, #ff6b6b);
 }
 
 /* Responsividade */
