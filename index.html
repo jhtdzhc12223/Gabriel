@@ -165,18 +165,24 @@
                         </button>
                         
                         <!-- Quinta Linha -->
-                        <button class="cyber-btn func-btn" data-func="hypot">
-                            <span class="func-primary">HYPOT</span>
+                        <button class="cyber-btn func-btn" data-func="mod">
+                            <span class="func-primary">MOD</span>
+                            <span class="func-secondary">REM</span>
                         </button>
-                        <button class="cyber-btn func-btn" data-func="cbrt">
-                            <span class="func-primary">CBRT</span>
+                        <button class="cyber-btn func-btn" data-func="gcd">
+                            <span class="func-primary">GCD</span>
+                            <span class="func-secondary">MCD</span>
                         </button>
-                        <button class="cyber-btn func-btn" data-func="log2">
-                            <span class="func-primary">log2</span>
-                            <span class="func-secondary">2^x</span>
+                        <button class="cyber-btn func-btn" data-func="lcm">
+                            <span class="func-primary">LCM</span>
+                            <span class="func-secondary">MCM</span>
                         </button>
                         <button class="cyber-btn func-btn" data-func="10^x">
                             <span class="func-primary">10<sup>x</sup></span>
+                        </button>
+                        <button class="cyber-btn stats-btn" data-func="stats-add">
+                            <span class="func-primary">DATA+</span>
+                            <span class="func-secondary">STATS</span>
                         </button>
                         <button class="cyber-btn num-btn" data-num="1">
                             <span class="num-char">1</span>
@@ -192,18 +198,24 @@
                         </button>
                         
                         <!-- Sexta Linha -->
-                        <button class="cyber-btn func-btn" data-func="round">
-                            <span class="func-primary">ROUND</span>
+                        <button class="cyber-btn func-btn" data-func="bin">
+                            <span class="func-primary">BIN</span>
+                            <span class="func-secondary">→BIN</span>
                         </button>
-                        <button class="cyber-btn func-btn" data-func="trunc">
-                            <span class="func-primary">TRUNC</span>
+                        <button class="cyber-btn func-btn" data-func="hex">
+                            <span class="func-primary">HEX</span>
+                            <span class="func-secondary">→HEX</span>
                         </button>
-                        <button class="cyber-btn func-btn" data-func="sign">
-                            <span class="func-primary">SIGN</span>
+                        <button class="cyber-btn func-btn" data-func="oct">
+                            <span class="func-primary">OCT</span>
+                            <span class="func-secondary">→OCT</span>
                         </button>
                         <button class="cyber-btn func-btn" data-func="deg">
                             <span class="func-primary">DEG</span>
                             <span class="func-secondary">RAD</span>
+                        </button>
+                        <button class="cyber-btn stats-btn" data-func="stats-clear">
+                            <span class="func-primary">CLR DATA</span>
                         </button>
                         <button class="cyber-btn num-btn" data-num="0">
                             <span class="num-char">0</span>
@@ -221,19 +233,25 @@
                         </button>
                         
                         <!-- Sétima Linha -->
-                        <button class="cyber-btn func-btn" data-func="stats-add">
-                            <span class="func-primary">DATA+</span>
-                            <span class="func-secondary">STATS</span>
+                        <button class="cyber-btn func-btn" data-func="mem-clear">
+                            <span class="func-primary">MC</span>
+                            <span class="func-secondary">MEM CLR</span>
                         </button>
-                        <button class="cyber-btn func-btn" data-func="stats-clear">
-                            <span class="func-primary">CLR DATA</span>
+                        <button class="cyber-btn func-btn" data-func="mem-recall">
+                            <span class="func-primary">MR</span>
+                            <span class="func-secondary">MEM RCL</span>
                         </button>
-                        <button class="cyber-btn func-btn" data-func="golden">
+                        <button class="cyber-btn func-btn" data-func="mem-add">
+                            <span class="func-primary">M+</span>
+                            <span class="func-secondary">MEM +</span>
+                        </button>
+                        <button class="cyber-btn func-btn" data-func="mem-sub">
+                            <span class="func-primary">M-</span>
+                            <span class="func-secondary">MEM -</span>
+                        </button>
+                        <button class="cyber-btn constants-btn" data-func="golden">
                             <span class="func-primary">φ</span>
                             <span class="func-secondary">1.6180</span>
-                        </button>
-                        <button class="cyber-btn func-btn" data-func="clamp">
-                            <span class="func-primary">CLAMP</span>
                         </button>
                         <button class="cyber-btn equals-btn" data-op="=">
                             <span class="equals-symbol">=</span>
@@ -251,6 +269,14 @@
                     <div class="neon-line"></div>
                     <div class="grid-overlay"></div>
                     <div class="particle-container" id="particles"></div>
+                </div>
+
+                <!-- Seletor de temas -->
+                <div class="theme-switcher">
+                    <div class="theme-btn purple-blue" data-theme="purple-blue"></div>
+                    <div class="theme-btn cyber-green" data-theme="cyber-green"></div>
+                    <div class="theme-btn matrix" data-theme="matrix"></div>
+                    <div class="theme-btn dark-red" data-theme="dark-red"></div>
                 </div>
             </div>
         </div>
@@ -326,14 +352,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Seletor de temas -->
-    <div class="theme-switcher">
-        <div class="theme-btn purple-blue active" data-theme="purple-blue"></div>
-        <div class="theme-btn cyber-green" data-theme="cyber-green"></div>
-        <div class="theme-btn matrix" data-theme="matrix"></div>
-        <div class="theme-btn dark-red" data-theme="dark-red"></div>
     </div>
     
     <script src="script.js"></script>

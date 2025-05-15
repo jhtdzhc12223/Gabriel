@@ -11,7 +11,13 @@ document.addEventListener('DOMContentLoaded', function() {
         history: [],
         lastOperation: null,
         currentMode: 'scientific',
-        waitingForOperand: false
+        waitingForOperand: false,
+        stats: {
+            data: [],
+            sum: 0,
+            count: 0
+        },
+        theme: 'purple-blue'
     };
 
     // Elementos DOM
@@ -54,6 +60,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Botões de modo
         document.querySelectorAll('.mode-btn').forEach(button => {
             button.addEventListener('click', () => switchMode(button.dataset.mode));
+        });
+        
+        // Botões de tema
+        document.querySelectorAll('.theme-btn').forEach(button => {
+            button.addEventListener('click', () => switchTheme(button.dataset.theme));
         });
         
         // Terminal
@@ -112,6 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (state.operation && state.previousValue !== null) {
                 calculate();
                 state.operation = null;
+                state.waitingForOperand = true;
             }
         } else {
             if (state.currentValue !== '0') {
@@ -122,7 +134,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 state.currentValue = '0';
             }
             state.operation = op;
-            state.waitingForOperand = true;
         }
         
         updateDisplay();
@@ -207,6 +218,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     result = Math.E;
                     break;
                     
+                case 'golden':
+                    result = (1 + Math.sqrt(5)) / 2;
+                    break;
+                    
                 case '^':
                     if (state.previousValue === null) throw new Error("Digite um número antes da operação");
                     result = Math.pow(parseFloat(state.previousValue), value);
@@ -232,6 +247,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                 case 'ceil':
                     result = Math.ceil(value);
+                    break;
+                    
+                case 'round':
+                    result = Math.round(value);
+                    break;
+                    
+                case 'trunc':
+                    result = Math.trunc(value);
+                    break;
+                    
+                case 'sign':
+                    result = Math.sign(value);
                     break;
                     
                 case 'rand':
@@ -260,6 +287,53 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                 case '10^x':
                     result = Math.pow(10, value);
+                    break;
+                    
+                case 'hypot':
+                    if (state.previousValue === null) throw new Error("Digite um número antes da operação");
+                    result = Math.hypot(parseFloat(state.previousValue), value);
+                    break;
+                    
+                case 'cbrt':
+                    result = Math.cbrt(value);
+                    break;
+                    
+                case 'log2':
+                    if (value <= 0) throw new Error("Logaritmo de número não positivo");
+                    result = state.isSecondFunction ? Math.pow(2, value) : Math.log2(value);
+                    break;
+                    
+                case 'clamp':
+                    if (!state.previousValue) throw new Error("Digite o valor mínimo antes");
+                    const min = parseFloat(state.previousValue);
+                    const max = parseFloat(state.currentValue);
+                    result = Math.min(Math.max(value, min), max);
+                    break;
+                    
+                case 'stats-add':
+                    state.stats.data.push(value);
+                    state.stats.sum += value;
+                    state.stats.count++;
+                    addTerminalMessage(`> Valor ${value} adicionado ao conjunto estatístico (total: ${state.stats.count})`, "system");
+                    return;
+                    
+                case 'stats-clear':
+                    state.stats.data = [];
+                    state.stats.sum = 0;
+                    state.stats.count = 0;
+                    addTerminalMessage("> Conjunto estatístico limpo", "system");
+                    return;
+                    
+                case 'stats-mean':
+                    if (state.stats.count === 0) throw new Error("Nenhum dado no conjunto");
+                    result = state.stats.sum / state.stats.count;
+                    break;
+                    
+                case 'stats-stddev':
+                    if (state.stats.count === 0) throw new Error("Nenhum dado no conjunto");
+                    const mean = state.stats.sum / state.stats.count;
+                    const squaredDiffs = state.stats.data.map(x => Math.pow(x - mean, 2));
+                    result = Math.sqrt(squaredDiffs.reduce((a, b) => a + b, 0) / state.stats.count);
                     break;
                     
                 case 'deg':
@@ -558,6 +632,13 @@ document.addEventListener('DOMContentLoaded', function() {
         addTerminalMessage(`> Modo alterado para: ${mode.toUpperCase()}`, "system");
     }
     
+    // Mudar tema da calculadora
+    function switchTheme(themeName) {
+        state.theme = themeName;
+        document.documentElement.className = themeName;
+        addTerminalMessage(`> Tema alterado para: ${themeName.replace('-', ' ').toUpperCase()}`, "system");
+    }
+    
     // Manipulador de entrada por teclado
     function handleKeyboardInput(e) {
         const key = e.key;
@@ -624,6 +705,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 addTerminalMessage("> clear - Limpa o terminal", "system");
                 addTerminalMessage("> history - Mostra histórico de cálculos", "system");
                 addTerminalMessage("> mode [basic|scientific|programmer|graph] - Muda modo", "system");
+                addTerminalMessage("> theme [purple-blue|cyber-green|matrix|dark-red] - Muda tema", "system");
                 addTerminalMessage("> rad - Muda para radianos", "system");
                 addTerminalMessage("> deg - Muda para graus", "system");
                 break;
@@ -655,6 +737,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         switchMode(mode);
                     } else {
                         addTerminalMessage("> Erro: Modo inválido. Use basic, scientific, programmer ou graph", "error");
+                    }
+                } else if (cmd.startsWith('theme ')) {
+                    const theme = cmd.split(' ')[1];
+                    const availableThemes = ['purple-blue', 'cyber-green', 'matrix', 'dark-red'];
+                    if (availableThemes.includes(theme)) {
+                        switchTheme(theme);
+                    } else {
+                        addTerminalMessage("> Erro: Tema inválido. Temas disponíveis: purple-blue, cyber-green, matrix, dark-red", "error");
                     }
                 } else {
                     addTerminalMessage("> Erro: Comando não reconhecido. Digite 'help' para ajuda", "error");
