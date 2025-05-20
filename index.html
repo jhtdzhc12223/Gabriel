@@ -6,6 +6,7 @@
     <title>NexusCalc Quantum - Calculadora Científica Futurista</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.7.0/math.min.js"></script>
 </head>
 <body>
     <div class="cyber-grid">
@@ -257,6 +258,92 @@
                             <span class="equals-symbol">=</span>
                             <span class="equals-subtext">ENTER</span>
                         </button>
+                    </div>
+                </div>
+                
+                <!-- Painel do Modo Programador -->
+                <div class="programmer-panel mode-panel" id="programmer-panel">
+                    <!-- Linha de botões de base numérica -->
+                    <div class="programmer-row">
+                        <button class="cyber-btn prog-btn" data-base="bin">BIN</button>
+                        <button class="cyber-btn prog-btn" data-base="oct">OCT</button>
+                        <button class="cyber-btn prog-btn" data-base="dec">DEC</button>
+                        <button class="cyber-btn prog-btn" data-base="hex">HEX</button>
+                        <button class="cyber-btn prog-btn" data-base="base32">BASE32</button>
+                        <button class="cyber-btn prog-btn" data-base="base64">BASE64</button>
+                    </div>
+                    
+                    <!-- Linha de operações bitwise -->
+                    <div class="programmer-row">
+                        <button class="cyber-btn bitwise-btn" data-bitop="and">AND</button>
+                        <button class="cyber-btn bitwise-btn" data-bitop="or">OR</button>
+                        <button class="cyber-btn bitwise-btn" data-bitop="xor">XOR</button>
+                        <button class="cyber-btn bitwise-btn" data-bitop="not">NOT</button>
+                        <button class="cyber-btn bitwise-btn" data-bitop="lshift">«</button>
+                        <button class="cyber-btn bitwise-btn" data-bitop="rshift">»</button>
+                    </div>
+                    
+                    <!-- Linha de operações avançadas -->
+                    <div class="programmer-row">
+                        <button class="cyber-btn prog-func-btn" data-progfunc="byteswap">BYTE SWAP</button>
+                        <button class="cyber-btn prog-func-btn" data-progfunc="wordswap">WORD SWAP</button>
+                        <button class="cyber-btn prog-func-btn" data-progfunc="rol">ROT LEFT</button>
+                        <button class="cyber-btn prog-func-btn" data-progfunc="ror">ROT RIGHT</button>
+                    </div>
+                    
+                    <!-- Linha de máscaras e representação -->
+                    <div class="programmer-row">
+                        <button class="cyber-btn mask-btn" data-mask="0xFF">0xFF</button>
+                        <button class="cyber-btn mask-btn" data-mask="0xFFFF">0xFFFF</button>
+                        <button class="cyber-btn rep-btn" data-rep="signed">SIGNED</button>
+                        <button class="cyber-btn rep-btn" data-rep="unsigned">UNSIGNED</button>
+                        <button class="cyber-btn rep-btn" data-rep="ieee32">FLOAT32</button>
+                        <button class="cyber-btn rep-btn" data-rep="ieee64">FLOAT64</button>
+                    </div>
+                    
+                    <!-- Visualização de bits -->
+                    <div class="bit-visualizer" id="bit-visualizer">
+                        <div class="bit-header">Bit View (32 bits)</div>
+                        <div class="bit-container" id="bit-container"></div>
+                    </div>
+                </div>
+                
+                <!-- Painel do Modo Gráfico -->
+                <div class="graph-panel mode-panel" id="graph-panel">
+                    <div class="graph-controls">
+                        <div class="graph-inputs">
+                            <input type="text" class="graph-formula" placeholder="f(x) = ">
+                            <button class="cyber-btn graph-btn" data-action="plot">Plot</button>
+                            <button class="cyber-btn graph-btn" data-action="clear">Clear</button>
+                        </div>
+                        
+                        <div class="graph-options">
+                            <button class="cyber-btn graph-opt-btn" data-option="zoom-in">Zoom +</button>
+                            <button class="cyber-btn graph-opt-btn" data-option="zoom-out">Zoom -</button>
+                            <button class="cyber-btn graph-opt-btn" data-option="pan">Pan</button>
+                            <button class="cyber-btn graph-opt-btn" data-option="auto">Auto</button>
+                            <button class="cyber-btn graph-opt-btn" data-option="find-root">Root</button>
+                            <button class="cyber-btn graph-opt-btn" data-option="find-extrema">Min/Max</button>
+                        </div>
+                        
+                        <div class="graph-type">
+                            <button class="cyber-btn graph-type-btn active" data-type="cartesian">Cartesian</button>
+                            <button class="cyber-btn graph-type-btn" data-type="polar">Polar</button>
+                            <button class="cyber-btn graph-type-btn" data-type="parametric">Parametric</button>
+                        </div>
+                    </div>
+                    
+                    <div class="graph-display">
+                        <canvas id="graph-canvas"></canvas>
+                    </div>
+                    
+                    <div class="graph-info">
+                        <div class="graph-coords" id="graph-coords">x: 0, y: 0</div>
+                        <div class="graph-export">
+                            <button class="cyber-btn export-btn" data-format="svg">SVG</button>
+                            <button class="cyber-btn export-btn" data-format="png">PNG</button>
+                            <button class="cyber-btn export-btn" data-format="csv">CSV</button>
+                        </div>
                     </div>
                 </div>
                 
