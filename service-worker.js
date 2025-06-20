@@ -1,22 +1,20 @@
 // Versão do cache - atualize sempre que modificar os recursos
-const CACHE_NAME = 'nexuscalc-quantum-v3';
+const CACHE_NAME = 'nexuscalc-quantum-v4';
 const OFFLINE_CACHE = 'nexuscalc-offline-v1';
 
 // Lista de todos os recursos necessários
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/script.js',
-  '/manifest.json',
+  './',
+  './index.html',
+  './styles.css',
+  './script.js',
+  './manifest.json',
   
   // Ícones
-  '/icons/icon-192x192.png',
-  '/icons/icon-256x256.png',
-  '/icons/icon-384x384.png',
-  '/icons/icon-512x512.png',
-  '/icons/icon-maskable-192x192.png',
-  '/icons/icon-maskable-512x512.png',
+  './icons/icon-192x192.png',
+  './icons/icon-256x256.png',
+  './icons/icon-384x384.png',
+  './icons/icon-512x512.png',
   
   // Recursos externos
   'https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.2.0/math.min.js',
@@ -24,7 +22,7 @@ const urlsToCache = [
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css',
   
   // Fallback offline
-  '/offline.html'
+  './offline.html'
 ];
 
 // Instalação do Service Worker
@@ -77,7 +75,7 @@ self.addEventListener('fetch', event => {
           .catch(() => {
             // Fallback para páginas offline
             if (event.request.headers.get('accept').includes('text/html')) {
-              return caches.match('/offline.html');
+              return caches.match('./offline.html');
             }
             
             // Fallback para outros recursos
