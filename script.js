@@ -17,7 +17,8 @@ document.addEventListener('DOMContentLoaded', function() {
             sum: 0,
             count: 0
         },
-        theme: 'purple-blue'
+        theme: 'purple-blue',
+        expression: ''
     };
 
     // Elementos DOM
@@ -93,6 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (state.waitingForOperand) {
             state.currentValue = '0';
             state.waitingForOperand = false;
+            state.expression = '';
         }
 
         if (state.currentValue === '0' && num !== '.') {
@@ -103,9 +105,11 @@ document.addEventListener('DOMContentLoaded', function() {
             state.currentValue += num;
         }
         
+        // Limite de dígitos com feedback
         if (state.currentValue.length > 15) {
+            const originalValue = state.currentValue;
             state.currentValue = state.currentValue.slice(0, 15);
-            addTerminalMessage("> Aviso: Limite de dígitos excedido. Valor truncado.", "system");
+            addTerminalMessage(`> Aviso: Limite de dígitos excedido. Valor truncado de ${originalValue} para ${state.currentValue}`, "system");
         }
         
         updateDisplay();
@@ -114,7 +118,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Manipulador de operações
     function handleOperation(op) {
         if (op === '±') {
-            state.currentValue = (parseFloat(state.currentValue) * -1).toString();
+            state.currentValue = state.currentValue.startsWith('-') ? 
+                state.currentValue.slice(1) : 
+                '-' + state.currentValue;
             updateDisplay();
             return;
         }
@@ -131,6 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     calculate();
                 }
                 state.previousValue = state.currentValue;
+                state.expression = state.currentValue + ' ' + op + ' ';
                 state.currentValue = '0';
             }
             state.operation = op;
@@ -249,22 +256,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     result = Math.ceil(value);
                     break;
                     
-                case 'round':
-                    result = Math.round(value);
-                    break;
-                    
-                case 'trunc':
-                    result = Math.trunc(value);
-                    break;
-                    
-                case 'sign':
-                    result = Math.sign(value);
-                    break;
-                    
-                case 'rand':
-                    result = Math.random();
-                    break;
-                    
                 case 'mod':
                     if (state.previousValue === null) throw new Error("Digite um número antes da operação");
                     if (value === 0) throw new Error("Divisão por zero");
@@ -289,27 +280,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     result = Math.pow(10, value);
                     break;
                     
-                case 'hypot':
-                    if (state.previousValue === null) throw new Error("Digite um número antes da operação");
-                    result = Math.hypot(parseFloat(state.previousValue), value);
-                    break;
-                    
-                case 'cbrt':
-                    result = Math.cbrt(value);
-                    break;
-                    
-                case 'log2':
-                    if (value <= 0) throw new Error("Logaritmo de número não positivo");
-                    result = state.isSecondFunction ? Math.pow(2, value) : Math.log2(value);
-                    break;
-                    
-                case 'clamp':
-                    if (!state.previousValue) throw new Error("Digite o valor mínimo antes");
-                    const min = parseFloat(state.previousValue);
-                    const max = parseFloat(state.currentValue);
-                    result = Math.min(Math.max(value, min), max);
-                    break;
-                    
                 case 'stats-add':
                     state.stats.data.push(value);
                     state.stats.sum += value;
@@ -323,18 +293,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     state.stats.count = 0;
                     addTerminalMessage("> Conjunto estatístico limpo", "system");
                     return;
-                    
-                case 'stats-mean':
-                    if (state.stats.count === 0) throw new Error("Nenhum dado no conjunto");
-                    result = state.stats.sum / state.stats.count;
-                    break;
-                    
-                case 'stats-stddev':
-                    if (state.stats.count === 0) throw new Error("Nenhum dado no conjunto");
-                    const mean = state.stats.sum / state.stats.count;
-                    const squaredDiffs = state.stats.data.map(x => Math.pow(x - mean, 2));
-                    result = Math.sqrt(squaredDiffs.reduce((a, b) => a + b, 0) / state.stats.count);
-                    break;
                     
                 case 'deg':
                     state.isRadians = !state.isRadians;
@@ -434,6 +392,7 @@ document.addEventListener('DOMContentLoaded', function() {
             state.previousValue = null;
             state.operation = null;
             state.waitingForOperand = false;
+            state.expression = '';
             addTerminalMessage("> Calculadora reiniciada", "system");
         } else if (clearType === 'CE') {
             state.currentValue = '0';
@@ -495,6 +454,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             state.currentValue = formatResult(result);
             state.previousValue = null;
+            state.expression = '';
             state.waitingForOperand = true;
             
             addTerminalMessage(`> Cálculo: ${prev} ${state.operation} ${current} = ${result}`, "success");
@@ -503,6 +463,7 @@ document.addEventListener('DOMContentLoaded', function() {
             state.currentValue = '0';
             state.previousValue = null;
             state.operation = null;
+            state.expression = '';
             updateDisplay();
         }
     }
@@ -511,7 +472,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateDisplay() {
         mainDisplay.textContent = state.currentValue;
         
-        if (state.operation && state.previousValue !== null) {
+        if (state.expression) {
+            secondaryDisplay.textContent = state.expression;
+        } else if (state.operation && state.previousValue !== null) {
             secondaryDisplay.textContent = `${state.previousValue} ${state.operation}`;
         } else {
             secondaryDisplay.textContent = '';
@@ -557,11 +520,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         secondarySpan.textContent = 'atanh';
                         break;
                     case 'log': 
-                        primarySpan.textContent = '10^x';
+                        primarySpan.textContent = '10ˣ';
                         secondarySpan.textContent = 'antilog';
                         break;
                     case 'ln': 
-                        primarySpan.textContent = 'e^x';
+                        primarySpan.textContent = 'eˣ';
                         secondarySpan.textContent = 'exp';
                         break;
                     case '√': 
@@ -600,11 +563,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         break;
                     case 'log': 
                         primarySpan.textContent = 'log';
-                        secondarySpan.textContent = '10^x';
+                        secondarySpan.textContent = '10ˣ';
                         break;
                     case 'ln': 
                         primarySpan.textContent = 'ln';
-                        secondarySpan.textContent = 'e^x';
+                        secondarySpan.textContent = 'eˣ';
                         break;
                     case '√': 
                         primarySpan.textContent = '√x';
@@ -630,6 +593,17 @@ document.addEventListener('DOMContentLoaded', function() {
         
         modeDisplay.textContent = `MODO: ${mode.toUpperCase()} | ${state.isRadians ? 'RAD' : 'DEG'}`;
         addTerminalMessage(`> Modo alterado para: ${mode.toUpperCase()}`, "system");
+        
+        // Mostrar/ocultar painéis específicos de modo
+        document.querySelectorAll('.mode-panel').forEach(panel => {
+            panel.style.display = 'none';
+        });
+        
+        if (mode === 'programmer') {
+            document.getElementById('programmer-panel').style.display = 'block';
+        } else if (mode === 'graph') {
+            document.getElementById('graph-panel').style.display = 'block';
+        }
     }
     
     // Mudar tema da calculadora
@@ -654,31 +628,42 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (key === 'Escape') {
             handleClear('C');
         } else if (key === 'Backspace') {
-            state.currentValue = state.currentValue.slice(0, -1) || '0';
+            state.currentValue = state.currentValue.length > 1 ? 
+                state.currentValue.slice(0, -1) : '0';
             updateDisplay();
-        } else if (key === 'm') {
-            handleFunction('mem-add');
-        } else if (key === 'r') {
+        } else if (key.toLowerCase() === 'm') {
+            if (e.shiftKey) {
+                handleFunction('mem-sub');
+            } else {
+                handleFunction('mem-add');
+            }
+        } else if (key.toLowerCase() === 'r') {
             handleFunction('mem-recall');
-        } else if (key === 's') {
+        } else if (key.toLowerCase() === 'c') {
+            if (e.ctrlKey) {
+                handleClear('C');
+            } else {
+                handleFunction('mem-clear');
+            }
+        } else if (key.toLowerCase() === 's') {
             handleFunction('sin');
-        } else if (key === 'c') {
+        } else if (key.toLowerCase() === 'o') {
             handleFunction('cos');
-        } else if (key === 't') {
+        } else if (key.toLowerCase() === 't') {
             handleFunction('tan');
-        } else if (key === 'p') {
+        } else if (key.toLowerCase() === 'p') {
             handleFunction('pi');
-        } else if (key === 'e') {
+        } else if (key.toLowerCase() === 'e') {
             handleFunction('e');
-        } else if (key === 'a') {
+        } else if (key.toLowerCase() === 'a') {
             handleFunction('abs');
-        } else if (key === 'l') {
+        } else if (key.toLowerCase() === 'l') {
             handleFunction('log');
-        } else if (key === 'n') {
+        } else if (key.toLowerCase() === 'n') {
             handleFunction('ln');
-        } else if (key === 'd') {
+        } else if (key.toLowerCase() === 'd') {
             handleFunction('deg');
-        } else if (key === '²') {
+        } else if (key === '²' || key === '^') {
             handleFunction('√');
         }
     }
@@ -747,7 +732,25 @@ document.addEventListener('DOMContentLoaded', function() {
                         addTerminalMessage("> Erro: Tema inválido. Temas disponíveis: purple-blue, cyber-green, matrix, dark-red", "error");
                     }
                 } else {
-                    addTerminalMessage("> Erro: Comando não reconhecido. Digite 'help' para ajuda", "error");
+                    try {
+                        // Tentar avaliar a expressão matemática
+                        const result = math.evaluate(command);
+                        state.currentValue = formatResult(result);
+                        updateDisplay();
+                        
+                        state.lastOperation = {
+                            command: command,
+                            result: result,
+                            timestamp: new Date()
+                        };
+                        
+                        state.history.push(state.lastOperation);
+                        addToHistory(state.lastOperation);
+                        
+                        addTerminalMessage(`> Resultado: ${result}`, "success");
+                    } catch (error) {
+                        addTerminalMessage("> Erro: Comando não reconhecido ou expressão inválida", "error");
+                    }
                 }
         }
     }
@@ -773,6 +776,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 addTerminalMessage(`> ${op.operand1} ${op.operation} ${op.operand2} = ${op.result}`, "system");
             } else if (op.function) {
                 addTerminalMessage(`> ${op.function}(${op.input}) = ${op.output}`, "system");
+            } else if (op.command) {
+                addTerminalMessage(`> ${op.command} = ${op.result}`, "system");
             }
         });
     }
@@ -800,6 +805,9 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (operation.function) {
             expression = `${operation.function}(${operation.input})`;
             result = operation.output;
+        } else if (operation.command) {
+            expression = operation.command;
+            result = operation.result;
         }
         
         const timeString = operation.timestamp.toLocaleTimeString();
@@ -879,13 +887,35 @@ document.addEventListener('DOMContentLoaded', function() {
             const duration = Math.random() * 25 + 15;
             const delay = Math.random() * 5;
             
-            // Cor aleatória (roxo ou azul)
-            const colors = [
-                'rgba(138, 43, 226, 0.7)', 
-                'rgba(0, 191, 255, 0.7)',
-                'rgba(211, 0, 255, 0.7)',
-                'rgba(0, 247, 255, 0.7)'
-            ];
+            // Cor aleatória (baseada no tema)
+            let colors;
+            switch(state.theme) {
+                case 'cyber-green':
+                    colors = [
+                        'rgba(0, 255, 157, 0.7)', 
+                        'rgba(0, 229, 255, 0.7)'
+                    ];
+                    break;
+                case 'matrix':
+                    colors = [
+                        'rgba(0, 255, 65, 0.7)', 
+                        'rgba(0, 143, 17, 0.7)'
+                    ];
+                    break;
+                case 'dark-red':
+                    colors = [
+                        'rgba(255, 0, 60, 0.7)', 
+                        'rgba(255, 107, 107, 0.7)'
+                    ];
+                    break;
+                default: // purple-blue
+                    colors = [
+                        'rgba(138, 43, 226, 0.7)', 
+                        'rgba(0, 191, 255, 0.7)',
+                        'rgba(211, 0, 255, 0.7)',
+                        'rgba(0, 247, 255, 0.7)'
+                    ];
+            }
             const color = colors[Math.floor(Math.random() * colors.length)];
             
             particle.style.cssText = `
