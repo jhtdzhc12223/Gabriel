@@ -41,31 +41,85 @@ document.addEventListener('DOMContentLoaded', function() {
         // Botões numéricos
         document.querySelectorAll('.num-btn').forEach(button => {
             button.addEventListener('click', () => handleNumberInput(button.dataset.num));
+            button.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                button.classList.add('active');
+                handleNumberInput(button.dataset.num);
+            });
+            button.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                button.classList.remove('active');
+            });
         });
         
         // Botões de operação
         document.querySelectorAll('.op-btn').forEach(button => {
             button.addEventListener('click', () => handleOperation(button.dataset.op));
+            button.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                button.classList.add('active');
+                handleOperation(button.dataset.op);
+            });
+            button.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                button.classList.remove('active');
+            });
         });
         
         // Botões de função
         document.querySelectorAll('.func-btn').forEach(button => {
             button.addEventListener('click', () => handleFunction(button.dataset.func));
+            button.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                button.classList.add('active');
+                handleFunction(button.dataset.func);
+            });
+            button.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                button.classList.remove('active');
+            });
         });
         
         // Botões de limpar
         document.querySelectorAll('.clear-btn').forEach(button => {
             button.addEventListener('click', () => handleClear(button.dataset.clear));
+            button.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                button.classList.add('active');
+                handleClear(button.dataset.clear);
+            });
+            button.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                button.classList.remove('active');
+            });
         });
         
         // Botões de modo
         document.querySelectorAll('.mode-btn').forEach(button => {
             button.addEventListener('click', () => switchMode(button.dataset.mode));
+            button.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                button.classList.add('active');
+                switchMode(button.dataset.mode);
+            });
+            button.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                button.classList.remove('active');
+            });
         });
         
         // Botões de tema
         document.querySelectorAll('.theme-btn').forEach(button => {
             button.addEventListener('click', () => switchTheme(button.dataset.theme));
+            button.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                button.classList.add('active');
+                switchTheme(button.dataset.theme);
+            });
+            button.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                button.classList.remove('active');
+            });
         });
         
         // Terminal
@@ -79,6 +133,18 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Teclado
         document.addEventListener('keydown', handleKeyboardInput);
+        
+        // Prevenir zoom em dispositivos móveis com toque duplo
+        document.addEventListener('dblclick', (e) => {
+            e.preventDefault();
+        });
+        
+        // Prevenir rolagem ao tocar em botões
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+            });
+        });
     }
 
     function showWelcomeMessages() {
