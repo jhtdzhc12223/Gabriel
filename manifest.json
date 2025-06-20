@@ -2,10 +2,11 @@
   "name": "NexusCalc Quantum",
   "short_name": "NexusCalc",
   "description": "Calculadora Científica Futurista",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#0a0a12",
   "theme_color": "#8a2be2",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "icons/icon-72x72.png",
@@ -35,6 +36,18 @@
     {
       "src": "icons/icon-192x192.png",
       "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-256x256.png",
+      "sizes": "256x256",
       "type": "image/png"
     },
     {
@@ -45,7 +58,14 @@
     {
       "src": "icons/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
