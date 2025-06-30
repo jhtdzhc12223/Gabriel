@@ -1,4 +1,4 @@
-/* ===== VARIÁVEIS E RESET ===== */
+/* ===== VARIÁVEIS GLOBAIS ===== */
 :root {
   /* Cores principais - Tema Cyber Purple/Blue */
   --primary-dark: #0a0a1a;
@@ -81,6 +81,7 @@
   --text-secondary: #ffa0a0;
 }
 
+/* ===== RESET E ESTILOS BASE ===== */
 * {
   margin: 0;
   padding: 0;
@@ -163,7 +164,7 @@ body::before {
   }
 }
 
-/* Efeitos de grade holográfica */
+/* Efeitos visuais */
 .grid-overlay {
   position: absolute;
   top: 0;
@@ -342,9 +343,6 @@ body::before {
   border: 1px solid rgba(138, 43, 226, 0.3);
   text-transform: uppercase;
   user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
 }
 
 .cyber-btn::before {
