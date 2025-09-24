@@ -4,16 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#121212">
+    <meta name="description" content="Calculadora avançada com modos básico, científico, programador e gráfico">
     <title>Calculadora Avançada</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="icons/icon-512x512.png" type="image/png">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧮</text></svg>">
 </head>
 <body>
     <div class="calculator">
         <div class="display">
             <div class="previous-operand" id="previous-operand"></div>
-            <div class="current-operand" id="current-operand"></div>
+            <div class="current-operand" id="current-operand">0</div>
         </div>
         
         <div class="mode-selector">
@@ -23,6 +24,7 @@
             <button class="mode-btn" data-mode="graphic">Gráfico</button>
         </div>
         
+        <!-- Modo Básico -->
         <div class="buttons basic-mode">
             <button class="span-2" data-action="clear">AC</button>
             <button data-action="delete">DEL</button>
@@ -48,21 +50,25 @@
             <button data-action="calculate">=</button>
         </div>
         
+        <!-- Modo Científico -->
         <div class="buttons scientific-mode hidden">
-            <!-- Botões científicos serão adicionados via JavaScript -->
+            <!-- Botões serão inseridos via JavaScript -->
         </div>
         
+        <!-- Modo Programador -->
         <div class="buttons programmer-mode hidden">
-            <!-- Botões de programador serão adicionados via JavaScript -->
+            <!-- Botões serão inseridos via JavaScript -->
         </div>
 
+        <!-- Modo Gráfico -->
         <div class="buttons graphic-mode hidden">
             <canvas id="graphCanvas" width="400" height="200"></canvas>
-            <input type="text" id="functionInput" placeholder="f(x) = ...">
+            <input type="text" id="functionInput" placeholder="f(x) = x*x" value="x*x">
             <button class="span-2" data-action="plot">Plotar Gráfico</button>
             <button data-action="clear-graph">Limpar</button>
         </div>
 
+        <!-- Botões de Memória -->
         <div class="memory-buttons">
             <button data-action="memory-clear">MC</button>
             <button data-action="memory-recall">MR</button>
@@ -70,26 +76,44 @@
             <button data-action="memory-subtract">M-</button>
         </div>
 
-        <div class="history-container hidden">
+        <!-- Histórico -->
+        <div class="history-container">
             <h3>Histórico</h3>
             <div class="history-list" id="history-list"></div>
-            <button class="span-2" data-action="clear-history">Limpar Histórico</button>
+            <button class="span-2" data-action="clear-history" style="margin-top: 10px; padding: 10px;">Limpar Histórico</button>
         </div>
     </div>
     
     <script src="script.js"></script>
     <script>
+        // Registrar Service Worker
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registrado com sucesso:', registration.scope);
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(function(registration) {
+                        console.log('ServiceWorker registrado com sucesso: ', registration.scope);
                     })
-                    .catch(error => {
-                        console.log('Falha ao registrar ServiceWorker:', error);
+                    .catch(function(error) {
+                        console.log('Falha ao registrar ServiceWorker: ', error);
                     });
             });
         }
+
+        // Prevenir zoom em dispositivos móveis
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        });
+
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(e) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
     </script>
 </body>
 </html>
