@@ -1,80 +1,65 @@
-const CACHE_NAME = 'calculadora-v3';
+const CACHE_NAME = 'super-calculator-v1';
 const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './styles.css',
-  './script.js',
-  './manifest.json'
+    '/',
+    '/index.html',
+    '/styles.css',
+    '/script.js',
+    '/math-parser.js',
+    '/converter.js',
+    '/graph-engine.js',
+    '/manifest.json',
+    'https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js'
 ];
 
-// Instalação
 self.addEventListener('install', (event) => {
-  console.log('Service Worker instalando...');
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Cache aberto');
-        return cache.addAll(ASSETS_TO_CACHE);
-      })
-      .then(() => self.skipWaiting())
-  );
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => {
+                console.log('Cache instalado');
+                return cache.addAll(ASSETS_TO_CACHE);
+            })
+            .then(() => self.skipWaiting())
+    );
 });
 
-// Ativação
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker ativando...');
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deletando cache antigo:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
-  );
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cacheName => {
+                    if (cacheName !== CACHE_NAME) {
+                        console.log('Deletando cache antigo:', cacheName);
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        }).then(() => self.clients.claim())
+    );
 });
 
-// Fetch
 self.addEventListener('fetch', (event) => {
-  // Ignora requisições que não são HTTP/HTTPS
-  if (!event.request.url.startsWith('http')) {
-    return;
-  }
+    if (!event.request.url.startsWith('http')) return;
 
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Retorna do cache se encontrado
-        if (response) {
-          return response;
-        }
+    event.respondWith(
+        caches.match(event.request)
+            .then(response => {
+                if (response) return response;
 
-        // Faz requisição network
-        return fetch(event.request)
-          .then((response) => {
-            // Verifica se a resposta é válida
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
+                return fetch(event.request)
+                    .then(response => {
+                        if (!response || response.status !== 200) return response;
 
-            // Clona a resposta para adicionar ao cache
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
+                        const responseClone = response.clone();
+                        caches.open(CACHE_NAME)
+                            .then(cache => cache.put(event.request, responseClone));
 
-            return response;
-          })
-          .catch(() => {
-            // Fallback para página offline
-            if (event.request.destination === 'document') {
-              return caches.match('./index.html');
-            }
-          });
-      })
-  );
+                        return response;
+                    })
+                    .catch(() => {
+                        if (event.request.destination === 'document') {
+                            return caches.match('/index.html');
+                        }
+                    });
+            })
+    );
 });
