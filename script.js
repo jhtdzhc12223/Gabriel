@@ -19,161 +19,216 @@ class Calculator {
         this.currentOperand = '0';
         this.previousOperand = '';
         this.operation = undefined;
+        this.shouldResetDisplay = false;
         this.updateDisplay();
     }
 
     delete() {
-        this.currentOperand = this.currentOperand.toString().slice(0, -1);
-        if (this.currentOperand === '') {
+        if (this.currentOperand.length === 1) {
             this.currentOperand = '0';
+        } else {
+            this.currentOperand = this.currentOperand.slice(0, -1);
         }
         this.updateDisplay();
     }
 
     appendNumber(number) {
-        if (number === '.' && this.currentOperand.includes('.')) return;
-        if (this.currentOperand === '0' && number !== '.') {
-            this.currentOperand = number;
-        } else {
-            this.currentOperand = this.currentOperand.toString() + number.toString();
+        if (this.shouldResetDisplay) {
+            this.currentOperand = '0';
+            this.shouldResetDisplay = false;
         }
+
+        if (number === '.' && this.currentOperand.includes('.')) return;
+        
+        if (this.currentOperand === '0') {
+            this.currentOperand = number === '.' ? '0.' : number;
+        } else {
+            this.currentOperand += number;
+        }
+        
         this.updateDisplay();
     }
 
     chooseOperation(operation) {
-        if (this.currentOperand === '') return;
-        if (this.previousOperand !== '') {
+        if (this.currentOperand === '' || this.currentOperand === '0') return;
+        
+        if (this.previousOperand !== '' && this.operation && !this.shouldResetDisplay) {
             this.compute();
         }
+        
         this.operation = operation;
         this.previousOperand = this.currentOperand;
-        this.currentOperand = '';
+        this.shouldResetDisplay = true;
         this.updateDisplay();
     }
 
     compute() {
+        if (this.operation === undefined || this.previousOperand === '') return;
+
         let computation;
         const prev = parseFloat(this.previousOperand);
-        const current = parseFloat(this.currentOperand);
-        if (isNaN(prev) return;
+        const current = this.currentOperand ? parseFloat(this.currentOperand) : 0;
 
-        if (isNaN(current) && this.operation !== 'x!' && this.operation !== '10^x') {
+        if (isNaN(prev)) return;
+
+        try {
+            switch (this.operation) {
+                case '+':
+                    computation = prev + current;
+                    break;
+                case '-':
+                    computation = prev - current;
+                    break;
+                case '×':
+                    computation = prev * current;
+                    break;
+                case '÷':
+                    if (current === 0) {
+                        throw new Error('Divisão por zero');
+                    }
+                    computation = prev / current;
+                    break;
+                case 'x^y':
+                case '^':
+                    computation = Math.pow(prev, current);
+                    break;
+                case 'mod':
+                    computation = prev % current;
+                    break;
+                case 'x²':
+                    computation = Math.pow(prev, 2);
+                    break;
+                case 'x!':
+                    computation = this.factorial(Math.floor(prev));
+                    break;
+                case '√':
+                    if (prev < 0) {
+                        throw new Error('Raiz de número negativo');
+                    }
+                    computation = Math.sqrt(prev);
+                    break;
+                case '10^x':
+                    computation = Math.pow(10, prev);
+                    break;
+                case 'EE':
+                    computation = prev * Math.pow(10, current);
+                    break;
+                default:
+                    return;
+            }
+
+            if (isNaN(computation) || !isFinite(computation)) {
+                throw new Error('Operação inválida');
+            }
+
+            const expression = `${this.previousOperand} ${this.operation} ${this.currentOperand !== '' ? this.currentOperand : ''}`.trim();
+            this.addToHistory(expression, computation);
+
+            this.currentOperand = this.formatResult(computation);
+            this.operation = undefined;
+            this.previousOperand = '';
+            this.shouldResetDisplay = true;
+
+        } catch (error) {
+            this.displayError(error.message);
             return;
         }
 
-        switch (this.operation) {
-            case '+':
-                computation = prev + current;
-                break;
-            case '-':
-                computation = prev - current;
-                break;
-            case '×':
-                computation = prev * current;
-                break;
-            case '÷':
-                computation = prev / current;
-                break;
-            case '^':
-            case 'x^y':
-                computation = Math.pow(prev, current);
-                break;
-            case 'mod':
-                computation = prev % current;
-                break;
-            case 'x²':
-                computation = Math.pow(prev, 2);
-                break;
-            case 'x!':
-                computation = this.factorial(prev);
-                break;
-            case '√':
-                computation = Math.sqrt(prev);
-                break;
-            case '10^x':
-                computation = Math.pow(10, prev);
-                break;
-            case 'EE':
-                computation = prev * Math.pow(10, current);
-                break;
-            default:
-                return;
-        }
-
-        const expression = `${this.previousOperand} ${this.operation || ''} ${this.currentOperand}`;
-        this.addToHistory(expression, computation);
-
-        if (String(computation).length > 12) {
-            this.currentOperand = computation.toExponential(5);
-        } else {
-            this.currentOperand = computation.toString();
-        }
-        this.operation = undefined;
-        this.previousOperand = '';
         this.updateDisplay();
     }
 
-    updateDisplay() {
-        this.currentOperandElement.innerText = this.formatNumber(this.currentOperand);
-        if (this.operation != null) {
-            this.previousOperandElement.innerText = 
-                `${this.formatNumber(this.previousOperand)} ${this.operation}`;
-        } else {
-            this.previousOperandElement.innerText = '';
+    formatResult(number) {
+        if (typeof number !== 'number' || !isFinite(number)) {
+            return 'Erro';
         }
+
+        // Para números muito grandes ou muito pequenos, usar notação científica
+        if (Math.abs(number) > 1e12 || (Math.abs(number) < 1e-6 && number !== 0)) {
+            return number.toExponential(6);
+        }
+
+        // Para números inteiros, mostrar sem casas decimais
+        if (Number.isInteger(number)) {
+            return number.toString();
+        }
+
+        // Para números decimais, limitar para 10 casas
+        return parseFloat(number.toFixed(10)).toString();
     }
 
-    formatNumber(number) {
-        if (number === '') return '';
-        const num = parseFloat(number);
-        if (isNaN(num)) return number;
+    displayError(message) {
+        this.currentOperand = 'Erro';
+        this.previousOperand = message;
+        this.operation = undefined;
+        this.shouldResetDisplay = true;
+        this.currentOperandElement.classList.add('error');
+        this.updateDisplay();
         
-        if (String(num).length > 12) {
-            return num.toExponential(5);
+        setTimeout(() => {
+            this.currentOperandElement.classList.remove('error');
+        }, 2000);
+    }
+
+    updateDisplay() {
+        this.currentOperandElement.innerText = this.currentOperand;
+        this.currentOperandElement.classList.remove('error');
+
+        if (this.operation) {
+            this.previousOperandElement.innerText = 
+                `${this.previousOperand} ${this.operation}`;
+        } else {
+            this.previousOperandElement.innerText = this.previousOperand;
         }
-        return number;
     }
 
     setupEventListeners() {
-        const numberButtons = document.querySelectorAll('[data-action="number"]');
-        const operationButtons = document.querySelectorAll('[data-action="operation"]');
-        const equalsButton = document.querySelector('[data-action="calculate"]');
-        const deleteButton = document.querySelector('[data-action="delete"]');
-        const clearButton = document.querySelector('[data-action="clear"]');
-
-        numberButtons.forEach(button => {
+        // Números
+        document.querySelectorAll('[data-action="number"]').forEach(button => {
             button.addEventListener('click', () => {
                 this.appendNumber(button.innerText);
             });
         });
 
-        operationButtons.forEach(button => {
+        // Operações básicas
+        document.querySelectorAll('[data-action="operation"]').forEach(button => {
             button.addEventListener('click', () => {
                 this.chooseOperation(button.innerText);
             });
         });
 
-        equalsButton.addEventListener('click', () => {
+        // Igual
+        document.querySelector('[data-action="calculate"]').addEventListener('click', () => {
             this.compute();
         });
 
-        clearButton.addEventListener('click', () => {
+        // Limpar
+        document.querySelector('[data-action="clear"]').addEventListener('click', () => {
             this.clear();
         });
 
-        deleteButton.addEventListener('click', () => {
+        // Deletar
+        document.querySelector('[data-action="delete"]').addEventListener('click', () => {
             this.delete();
         });
 
-        // Teclado físico
+        // Teclado
         document.addEventListener('keydown', (e) => {
-            if (/[0-9.]/.test(e.key)) {
+            if (e.key >= '0' && e.key <= '9' || e.key === '.') {
                 this.appendNumber(e.key);
-            } else if (/[+\-*/]/.test(e.key)) {
-                this.chooseOperation(e.key === '*' ? '×' : e.key === '/' ? '÷' : e.key);
+            } else if (e.key === '+') {
+                this.chooseOperation('+');
+            } else if (e.key === '-') {
+                this.chooseOperation('-');
+            } else if (e.key === '*') {
+                this.chooseOperation('×');
+            } else if (e.key === '/') {
+                e.preventDefault();
+                this.chooseOperation('÷');
             } else if (e.key === 'Enter' || e.key === '=') {
+                e.preventDefault();
                 this.compute();
             } else if (e.key === 'Backspace') {
+                e.preventDefault();
                 this.delete();
             } else if (e.key === 'Escape') {
                 this.clear();
@@ -182,23 +237,35 @@ class Calculator {
     }
 
     setupModeButtons() {
-        const modeButtons = document.querySelectorAll('.mode-btn');
-        const calculatorModes = document.querySelectorAll('.buttons:not(.mode-selector)');
-
-        modeButtons.forEach(button => {
+        document.querySelectorAll('.mode-btn').forEach(button => {
             button.addEventListener('click', () => {
-                modeButtons.forEach(btn => btn.classList.remove('active'));
+                // Atualizar botões de modo
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
                 button.classList.add('active');
                 
-                calculatorModes.forEach(mode => mode.classList.add('hidden'));
+                // Esconder todos os modos
+                document.querySelectorAll('.buttons:not(.mode-selector)').forEach(mode => {
+                    mode.classList.add('hidden');
+                });
                 
+                // Mostrar modo selecionado
                 const selectedMode = document.querySelector(`.${button.dataset.mode}-mode`);
                 if (selectedMode) {
                     selectedMode.classList.remove('hidden');
                 }
 
+                // Mostrar/ocultar histórico baseado no modo
+                const historyContainer = document.querySelector('.history-container');
+                if (button.dataset.mode === 'basic') {
+                    historyContainer.classList.remove('hidden');
+                } else {
+                    historyContainer.classList.add('hidden');
+                }
+
                 this.currentMode = button.dataset.mode;
-                this.updateDisplay();
+                this.clear();
             });
         });
     }
@@ -211,162 +278,197 @@ class Calculator {
             '10^x', 'x!', 'mod', 'EE'
         ];
 
-        const scientificContainer = document.querySelector('.scientific-mode');
+        const container = document.querySelector('.scientific-mode');
+        container.innerHTML = ''; // Limpar container primeiro
         
-        scientificButtons.forEach(text => {
-            const button = document.createElement('button');
-            button.innerText = text;
-            button.setAttribute('data-action', 'scientific');
-            scientificContainer.appendChild(button);
-            
-            button.addEventListener('click', () => {
-                this.handleScientificButton(text);
-            });
+        // Primeira linha
+        const firstRow = document.createElement('div');
+        firstRow.className = 'scientific-row';
+        firstRow.style.display = 'grid';
+        firstRow.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        firstRow.style.gap = '1px';
+        
+        scientificButtons.slice(0, 8).forEach(text => {
+            firstRow.appendChild(this.createScientificButton(text));
         });
+        
+        // Segunda linha
+        const secondRow = document.createElement('div');
+        secondRow.className = 'scientific-row';
+        secondRow.style.display = 'grid';
+        secondRow.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        secondRow.style.gap = '1px';
+        secondRow.style.marginTop = '1px';
+        
+        scientificButtons.slice(8).forEach(text => {
+            secondRow.appendChild(this.createScientificButton(text));
+        });
+
+        container.appendChild(firstRow);
+        container.appendChild(secondRow);
+    }
+
+    createScientificButton(text) {
+        const button = document.createElement('button');
+        button.innerText = text;
+        button.setAttribute('data-action', 'scientific');
+        button.addEventListener('click', () => this.handleScientificButton(text));
+        return button;
     }
 
     initializeProgrammerButtons() {
         const programmerButtons = [
             'HEX', 'DEC', 'OCT', 'BIN',
             'AND', 'OR', 'XOR', 'NOT',
-            '<<', '>>', 'NAND', 'NOR',
-            'XNOR', 'A', 'B', 'C',
-            'D', 'E', 'F', 'RoL',
-            'RoR', '~', '|', '^'
+            '<<', '>>', 'A', 'B',
+            'C', 'D', 'E', 'F'
         ];
 
-        const programmerContainer = document.querySelector('.programmer-mode');
+        const container = document.querySelector('.programmer-mode');
+        container.innerHTML = '';
         
-        programmerButtons.forEach(text => {
-            const button = document.createElement('button');
-            button.innerText = text;
-            button.setAttribute('data-action', 'programmer');
-            programmerContainer.appendChild(button);
+        programmerButtons.forEach((text, index) => {
+            if (index % 4 === 0) {
+                const row = document.createElement('div');
+                row.style.display = 'grid';
+                row.style.gridTemplateColumns = 'repeat(4, 1fr)';
+                row.style.gap = '1px';
+                if (index > 0) row.style.marginTop = '1px';
+                container.appendChild(row);
+            }
             
-            button.addEventListener('click', () => {
-                this.handleProgrammerButton(text);
-            });
+            const lastRow = container.lastChild;
+            const button = this.createProgrammerButton(text);
+            lastRow.appendChild(button);
         });
     }
 
-    handleScientificButton(operation) {
-        const current = parseFloat(this.currentOperand);
-        if (isNaN(current) && operation !== 'π' && operation !== 'e') return;
+    createProgrammerButton(text) {
+        const button = document.createElement('button');
+        button.innerText = text;
+        button.setAttribute('data-action', 'programmer');
+        button.addEventListener('click', () => this.handleProgrammerButton(text));
+        return button;
+    }
 
-        switch (operation) {
-            case 'sin':
-                this.currentOperand = Math.sin(current * Math.PI / 180).toString();
-                break;
-            case 'cos':
-                this.currentOperand = Math.cos(current * Math.PI / 180).toString();
-                break;
-            case 'tan':
-                this.currentOperand = Math.tan(current * Math.PI / 180).toString();
-                break;
-            case 'log':
-                this.currentOperand = Math.log10(current).toString();
-                break;
-            case 'ln':
-                this.currentOperand = Math.log(current).toString();
-                break;
-            case '√':
-                this.currentOperand = Math.sqrt(current).toString();
-                break;
-            case 'x²':
-                this.operation = 'x²';
-                this.previousOperand = this.currentOperand;
-                this.compute();
+    handleScientificButton(operation) {
+        try {
+            let result;
+            const current = parseFloat(this.currentOperand);
+
+            if (isNaN(current) && !['π', 'e'].includes(operation)) {
                 return;
-            case 'x^y':
-                this.chooseOperation('x^y');
-                return;
-            case 'π':
-                this.currentOperand = Math.PI.toString();
-                break;
-            case 'e':
-                this.currentOperand = Math.E.toString();
-                break;
-            case 'x!':
-                this.operation = 'x!';
-                this.previousOperand = this.currentOperand;
-                this.compute();
-                return;
-            case 'mod':
-                this.chooseOperation('mod');
-                return;
-            case '10^x':
-                this.operation = '10^x';
-                this.previousOperand = this.currentOperand;
-                this.compute();
-                return;
-            case 'EE':
-                this.chooseOperation('EE');
-                return;
+            }
+
+            switch (operation) {
+                case 'sin':
+                    result = Math.sin(current * Math.PI / 180);
+                    break;
+                case 'cos':
+                    result = Math.cos(current * Math.PI / 180);
+                    break;
+                case 'tan':
+                    result = Math.tan(current * Math.PI / 180);
+                    break;
+                case 'log':
+                    if (current <= 0) throw new Error('Log de número não positivo');
+                    result = Math.log10(current);
+                    break;
+                case 'ln':
+                    if (current <= 0) throw new Error('Ln de número não positivo');
+                    result = Math.log(current);
+                    break;
+                case '√':
+                    if (current < 0) throw new Error('Raiz de número negativo');
+                    result = Math.sqrt(current);
+                    break;
+                case 'x²':
+                    result = Math.pow(current, 2);
+                    break;
+                case 'x^y':
+                    this.chooseOperation('x^y');
+                    return;
+                case 'π':
+                    result = Math.PI;
+                    break;
+                case 'e':
+                    result = Math.E;
+                    break;
+                case '10^x':
+                    result = Math.pow(10, current);
+                    break;
+                case 'x!':
+                    if (current < 0 || !Number.isInteger(current)) {
+                        throw new Error('Fatorial requer inteiro não negativo');
+                    }
+                    result = this.factorial(current);
+                    break;
+                case 'mod':
+                    this.chooseOperation('mod');
+                    return;
+                case 'EE':
+                    this.chooseOperation('EE');
+                    return;
+                default:
+                    return;
+            }
+
+            this.addToHistory(`${operation}(${this.currentOperand})`, result);
+            this.currentOperand = this.formatResult(result);
+            this.shouldResetDisplay = true;
+            this.updateDisplay();
+
+        } catch (error) {
+            this.displayError(error.message);
         }
-        
-        this.updateDisplay();
     }
 
     handleProgrammerButton(operation) {
-        let currentValue;
-        
         try {
-            if (this.currentOperand === '') {
-                currentValue = 0;
-            } else {
-                // Tenta determinar a base atual
-                if (this.currentOperand.match(/^[0-9]+$/)) {
-                    currentValue = parseInt(this.currentOperand, 10);
-                } else if (this.currentOperand.match(/^[0-9A-F]+$/)) {
-                    currentValue = parseInt(this.currentOperand, 16);
-                } else {
-                    currentValue = 0;
-                }
-            }
-        } catch {
-            currentValue = 0;
-        }
+            let currentValue = parseInt(this.currentOperand) || 0;
 
-        switch(operation) {
-            case 'HEX':
-                this.currentOperand = currentValue.toString(16).toUpperCase();
-                break;
-            case 'DEC':
-                this.currentOperand = currentValue.toString(10);
-                break;
-            case 'OCT':
-                this.currentOperand = currentValue.toString(8);
-                break;
-            case 'BIN':
-                this.currentOperand = currentValue.toString(2);
-                break;
-            case 'AND':
-                this.chooseOperation('AND');
-                break;
-            case 'OR':
-                this.chooseOperation('OR');
-                break;
-            case 'XOR':
-                this.chooseOperation('XOR');
-                break;
-            case 'NOT':
-                this.currentOperand = (~currentValue >>> 0).toString(10);
-                break;
-            case 'A':
-            case 'B':
-            case 'C':
-            case 'D':
-            case 'E':
-            case 'F':
-                this.appendNumber(operation);
-                return;
+            switch(operation) {
+                case 'HEX':
+                    this.currentOperand = currentValue.toString(16).toUpperCase();
+                    break;
+                case 'DEC':
+                    this.currentOperand = currentValue.toString(10);
+                    break;
+                case 'OCT':
+                    this.currentOperand = currentValue.toString(8);
+                    break;
+                case 'BIN':
+                    this.currentOperand = currentValue.toString(2);
+                    break;
+                case 'AND':
+                case 'OR':
+                case 'XOR':
+                    this.chooseOperation(operation);
+                    return;
+                case 'NOT':
+                    this.currentOperand = (~currentValue >>> 0).toString(10);
+                    break;
+                case '<<':
+                    this.currentOperand = (currentValue << 1).toString(10);
+                    break;
+                case '>>':
+                    this.currentOperand = (currentValue >> 1).toString(10);
+                    break;
+                case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
+                    this.appendNumber(operation);
+                    return;
+                default:
+                    return;
+            }
+
+            this.updateDisplay();
+
+        } catch (error) {
+            this.displayError('Erro de conversão');
         }
-        
-        this.updateDisplay();
     }
 
     factorial(n) {
-        if (n < 0) return NaN;
         if (n === 0 || n === 1) return 1;
         let result = 1;
         for (let i = 2; i <= n; i++) {
@@ -417,8 +519,8 @@ class Calculator {
             const historyItem = document.createElement('div');
             historyItem.className = 'history-item';
             historyItem.innerHTML = `
-                <div>${item.expression} =</div>
-                <div><strong>${this.formatNumber(item.result)}</strong></div>
+                <div>${item.expression}</div>
+                <div>= ${this.formatResult(parseFloat(item.result))}</div>
             `;
             
             historyItem.addEventListener('click', () => {
@@ -452,22 +554,23 @@ class Calculator {
     }
 
     plotGraph() {
-        const funcStr = this.functionInput.value;
+        const funcStr = this.functionInput.value.trim();
         if (!funcStr) return;
         
         try {
             const func = this.parseFunction(funcStr);
             this.drawGraph(func);
-        } catch (e) {
-            alert('Função inválida: ' + e.message);
+        } catch (error) {
+            alert('Erro ao plotar: ' + error.message);
         }
     }
 
     parseFunction(funcStr) {
-        // Implementação simplificada - na prática use uma biblioteca como math.js
         return (x) => {
             try {
-                return eval(funcStr.replace(/x/g, `(${x})`));
+                // Substitui 'x' pelo valor numérico e avalia
+                const expression = funcStr.replace(/x/g, `(${x})`);
+                return eval(expression);
             } catch {
                 return NaN;
             }
@@ -477,11 +580,34 @@ class Calculator {
     drawGraph(func) {
         const width = this.canvas.width;
         const height = this.canvas.height;
-        this.ctx.clearRect(0, 0, width, height);
         
-        // Desenhar eixos
-        this.ctx.strokeStyle = '#BB86FC';
+        // Limpar canvas
+        this.ctx.fillStyle = '#1E1E1E';
+        this.ctx.fillRect(0, 0, width, height);
+        
+        // Desenhar grade
+        this.ctx.strokeStyle = '#333';
         this.ctx.lineWidth = 1;
+        
+        // Grade vertical
+        for (let x = 0; x <= width; x += width / 10) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(x, 0);
+            this.ctx.lineTo(x, height);
+            this.ctx.stroke();
+        }
+        
+        // Grade horizontal
+        for (let y = 0; y <= height; y += height / 10) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, y);
+            this.ctx.lineTo(width, y);
+            this.ctx.stroke();
+        }
+        
+        // Eixos
+        this.ctx.strokeStyle = '#BB86FC';
+        this.ctx.lineWidth = 2;
         
         // Eixo X
         this.ctx.beginPath();
@@ -495,24 +621,28 @@ class Calculator {
         this.ctx.lineTo(width/2, height);
         this.ctx.stroke();
         
-        // Desenhar gráfico
+        // Gráfico
         this.ctx.strokeStyle = '#03DAC6';
         this.ctx.lineWidth = 2;
         this.ctx.beginPath();
         
-        const scale = 50;
-        const step = 0.1;
+        const scale = 40;
+        let isFirstPoint = true;
         
-        for (let x = -width/2/scale; x <= width/2/scale; x += step) {
+        for (let pixelX = 0; pixelX <= width; pixelX++) {
+            const x = (pixelX - width/2) / scale;
             const y = -func(x) * scale + height/2;
-            const px = x * scale + width/2;
             
-            if (isNaN(y)) continue;
+            if (isNaN(y) || !isFinite(y)) {
+                isFirstPoint = true;
+                continue;
+            }
             
-            if (x === -width/2/scale) {
-                this.ctx.moveTo(px, y);
+            if (isFirstPoint) {
+                this.ctx.moveTo(pixelX, y);
+                isFirstPoint = false;
             } else {
-                this.ctx.lineTo(px, y);
+                this.ctx.lineTo(pixelX, y);
             }
         }
         
@@ -520,12 +650,18 @@ class Calculator {
     }
 
     clearGraph() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = '#1E1E1E';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.functionInput.value = '';
     }
 }
 
-// Initialize calculator
-const previousOperandElement = document.getElementById('previous-operand');
-const currentOperandElement = document.getElementById('current-operand');
-const calculator = new Calculator(previousOperandElement, currentOperandElement);
+// Inicializar quando o DOM estiver carregado
+document.addEventListener('DOMContentLoaded', () => {
+    const previousOperandElement = document.getElementById('previous-operand');
+    const currentOperandElement = document.getElementById('current-operand');
+    
+    if (previousOperandElement && currentOperandElement) {
+        window.calculator = new Calculator(previousOperandElement, currentOperandElement);
+    }
+});
