@@ -1,119 +1,194 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#121212">
-    <meta name="description" content="Calculadora avançada com modos básico, científico, programador e gráfico">
-    <title>Calculadora Avançada</title>
-    <link rel="manifest" href="manifest.json">
+    <meta name="description" content="Calculadora avançada com múltiplos modos, gráficos, conversores e muito mais">
+    <title>Calculadora Super Premium</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧮</text></svg>">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23121212'/><text x='50' y='60' font-size='40' text-anchor='middle' fill='%23BB86FC'>🧮</text></svg>">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 </head>
 <body>
     <div class="calculator">
+        <!-- Header com controles -->
+        <div class="calculator-header">
+            <button class="theme-toggle" id="themeToggle">🌙</button>
+            <button class="help-btn" id="helpBtn">?</button>
+            <button class="settings-btn" id="settingsBtn">⚙️</button>
+            <span class="calculator-title">Calculadora Premium</span>
+        </div>
+
+        <!-- Display Principal -->
         <div class="display">
             <div class="previous-operand" id="previous-operand"></div>
             <div class="current-operand" id="current-operand">0</div>
+            <div class="variables-display" id="variablesDisplay"></div>
         </div>
-        
+
+        <!-- Seletor de Modos -->
         <div class="mode-selector">
             <button class="mode-btn active" data-mode="basic">Básico</button>
             <button class="mode-btn" data-mode="scientific">Científico</button>
             <button class="mode-btn" data-mode="programmer">Programador</button>
             <button class="mode-btn" data-mode="graphic">Gráfico</button>
-        </div>
-        
-        <!-- Modo Básico -->
-        <div class="buttons basic-mode">
-            <button class="span-2" data-action="clear">AC</button>
-            <button data-action="delete">DEL</button>
-            <button data-action="operation">÷</button>
-            
-            <button data-action="number">7</button>
-            <button data-action="number">8</button>
-            <button data-action="number">9</button>
-            <button data-action="operation">×</button>
-            
-            <button data-action="number">4</button>
-            <button data-action="number">5</button>
-            <button data-action="number">6</button>
-            <button data-action="operation">-</button>
-            
-            <button data-action="number">1</button>
-            <button data-action="number">2</button>
-            <button data-action="number">3</button>
-            <button data-action="operation">+</button>
-            
-            <button class="span-2" data-action="number">0</button>
-            <button data-action="number">.</button>
-            <button data-action="calculate">=</button>
-        </div>
-        
-        <!-- Modo Científico -->
-        <div class="buttons scientific-mode hidden">
-            <!-- Botões serão inseridos via JavaScript -->
-        </div>
-        
-        <!-- Modo Programador -->
-        <div class="buttons programmer-mode hidden">
-            <!-- Botões serão inseridos via JavaScript -->
+            <button class="mode-btn" data-mode="converter">Conversor</button>
         </div>
 
-        <!-- Modo Gráfico -->
-        <div class="buttons graphic-mode hidden">
-            <canvas id="graphCanvas" width="400" height="200"></canvas>
-            <input type="text" id="functionInput" placeholder="f(x) = x*x" value="x*x">
-            <button class="span-2" data-action="plot">Plotar Gráfico</button>
-            <button data-action="clear-graph">Limpar</button>
+        <!-- Área de Trabalho Dinâmica -->
+        <div class="workspace">
+            <!-- Modo Básico -->
+            <div class="mode-panel basic-mode active">
+                <div class="buttons-grid">
+                    <button class="span-2" data-action="clear">AC</button>
+                    <button data-action="delete">DEL</button>
+                    <button data-action="operation">÷</button>
+                    
+                    <button data-action="number">7</button>
+                    <button data-action="number">8</button>
+                    <button data-action="number">9</button>
+                    <button data-action="operation">×</button>
+                    
+                    <button data-action="number">4</button>
+                    <button data-action="number">5</button>
+                    <button data-action="number">6</button>
+                    <button data-action="operation">-</button>
+                    
+                    <button data-action="number">1</button>
+                    <button data-action="number">2</button>
+                    <button data-action="number">3</button>
+                    <button data-action="operation">+</button>
+                    
+                    <button class="span-2" data-action="number">0</button>
+                    <button data-action="number">.</button>
+                    <button data-action="calculate">=</button>
+                </div>
+            </div>
+
+            <!-- Modo Científico -->
+            <div class="mode-panel scientific-mode">
+                <div class="scientific-controls">
+                    <select id="angleUnit">
+                        <option value="deg">DEG</option>
+                        <option value="rad">RAD</option>
+                        <option value="grad">GRAD</option>
+                    </select>
+                    <button data-action="shift">Shift</button>
+                </div>
+                <div class="buttons-grid scientific-buttons">
+                    <!-- Gerado via JavaScript -->
+                </div>
+            </div>
+
+            <!-- Modo Programador -->
+            <div class="mode-panel programmer-mode">
+                <div class="programmer-controls">
+                    <select id="numberBase">
+                        <option value="hex">HEX</option>
+                        <option value="dec">DEC</option>
+                        <option value="oct">OCT</option>
+                        <option value="bin">BIN</option>
+                    </select>
+                    <button data-action="bit-toggle">Bit View</button>
+                </div>
+                <div class="buttons-grid programmer-buttons">
+                    <!-- Gerado via JavaScript -->
+                </div>
+            </div>
+
+            <!-- Modo Gráfico -->
+            <div class="mode-panel graphic-mode">
+                <div class="graph-controls">
+                    <input type="text" id="functionInput" placeholder="f(x) = x^2 + 2*x + 1" value="x^2">
+                    <button data-action="plot">Plotar</button>
+                    <button data-action="clear-graph">Limpar</button>
+                    <button data-action="derivative">Derivada</button>
+                    <button data-action="integral">Integral</button>
+                </div>
+                <canvas id="graphCanvas" width="600" height="300"></canvas>
+                <div class="graph-info" id="graphInfo"></div>
+            </div>
+
+            <!-- Modo Conversor -->
+            <div class="mode-panel converter-mode">
+                <div class="converter-controls">
+                    <select id="converterCategory">
+                        <option value="length">Comprimento</option>
+                        <option value="temperature">Temperatura</option>
+                        <option value="weight">Peso</option>
+                        <option value="currency">Moeda</option>
+                        <option value="time">Tempo</option>
+                    </select>
+                </div>
+                <div class="converter-interface" id="converterInterface">
+                    <!-- Gerado dinamicamente -->
+                </div>
+            </div>
         </div>
 
-        <!-- Botões de Memória -->
-        <div class="memory-buttons">
-            <button data-action="memory-clear">MC</button>
-            <button data-action="memory-recall">MR</button>
-            <button data-action="memory-add">M+</button>
-            <button data-action="memory-subtract">M-</button>
+        <!-- Painel de Memória e Variáveis -->
+        <div class="side-panel">
+            <div class="memory-section">
+                <h4>Memória</h4>
+                <div class="memory-buttons">
+                    <button data-action="memory-clear">MC</button>
+                    <button data-action="memory-recall">MR</button>
+                    <button data-action="memory-add">M+</button>
+                    <button data-action="memory-subtract">M-</button>
+                    <button data-action="memory-store">MS</button>
+                </div>
+                <div class="memory-display" id="memoryDisplay">M: 0</div>
+            </div>
+
+            <div class="variables-section">
+                <h4>Variáveis</h4>
+                <div class="variables-list" id="variablesList"></div>
+                <input type="text" id="varName" placeholder="Nome">
+                <input type="text" id="varValue" placeholder="Valor">
+                <button data-action="var-set">Definir</button>
+            </div>
+
+            <div class="history-section">
+                <h4>Histórico</h4>
+                <div class="history-list" id="historyList"></div>
+                <button data-action="clear-history">Limpar</button>
+                <button data-action="export-history">Exportar</button>
+            </div>
         </div>
 
-        <!-- Histórico -->
-        <div class="history-container">
-            <h3>Histórico</h3>
-            <div class="history-list" id="history-list"></div>
-            <button class="span-2" data-action="clear-history" style="margin-top: 10px; padding: 10px;">Limpar Histórico</button>
+        <!-- Modais -->
+        <div class="modal" id="settingsModal">
+            <div class="modal-content">
+                <h3>Configurações</h3>
+                <div class="setting-group">
+                    <label>Precisão Decimal:</label>
+                    <input type="number" id="decimalPrecision" min="0" max="15" value="10">
+                </div>
+                <div class="setting-group">
+                    <label>Notação Científica:</label>
+                    <select id="scientificNotation">
+                        <option value="auto">Automático</option>
+                        <option value="always">Sempre</option>
+                        <option value="never">Nunca</option>
+                    </select>
+                </div>
+                <button data-action="save-settings">Salvar</button>
+            </div>
+        </div>
+
+        <div class="modal" id="helpModal">
+            <div class="modal-content">
+                <h3>Ajuda</h3>
+                <div class="tutorial-steps" id="tutorialSteps"></div>
+            </div>
         </div>
     </div>
-    
+
+    <script src="math-parser.js"></script>
+    <script src="converter.js"></script>
+    <script src="graph-engine.js"></script>
     <script src="script.js"></script>
-    <script>
-        // Registrar Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('./service-worker.js')
-                    .then(function(registration) {
-                        console.log('ServiceWorker registrado com sucesso: ', registration.scope);
-                    })
-                    .catch(function(error) {
-                        console.log('Falha ao registrar ServiceWorker: ', error);
-                    });
-            });
-        }
-
-        // Prevenir zoom em dispositivos móveis
-        document.addEventListener('touchstart', function(e) {
-            if (e.touches.length > 1) {
-                e.preventDefault();
-            }
-        });
-
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function(e) {
-            const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                e.preventDefault();
-            }
-            lastTouchEnd = now;
-        }, false);
-    </script>
 </body>
 </html>
