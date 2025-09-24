@@ -1,19 +1,43 @@
 {
-    "name": "Calculadora Avançada",
-    "short_name": "Calculadora",
-    "description": "Calculadora completa com modos básico, científico, programador e gráfico",
-    "start_url": "./",
+    "name": "Calculadora Super Premium",
+    "short_name": "SuperCalc",
+    "description": "Calculadora avançada com múltiplos modos, gráficos, conversores e muito mais",
+    "start_url": "/",
     "display": "standalone",
     "background_color": "#121212",
     "theme_color": "#BB86FC",
-    "orientation": "portrait",
-    "categories": ["utilities", "productivity"],
+    "orientation": "any",
+    "categories": ["education", "productivity", "utilities"],
     "lang": "pt-BR",
     "icons": [
         {
             "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23121212'/><text x='50' y='60' font-size='40' text-anchor='middle' fill='%23BB86FC'>🧮</text></svg>",
             "sizes": "any",
             "type": "image/svg+xml"
+        },
+        {
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%23121212'/><text x='96' y='120' font-size='80' text-anchor='middle' fill='%23BB86FC'>🧮</text></svg>",
+            "sizes": "192x192",
+            "type": "image/svg+xml"
+        },
+        {
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%23121212'/><text x='256' y='300' font-size='200' text-anchor='middle' fill='%23BB86FC'>🧮</text></svg>",
+            "sizes": "512x512",
+            "type": "image/svg+xml"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/screenshots/basic.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "description": "Modo básico da calculadora"
+        },
+        {
+            "src": "/screenshots/scientific.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "description": "Modo científico avançado"
         }
     ]
 }
